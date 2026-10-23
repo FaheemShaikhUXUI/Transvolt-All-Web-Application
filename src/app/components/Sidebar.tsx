@@ -12,6 +12,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Boxes,
 } from 'lucide-react';
 import TransvoltLogo from '../../imports/Transvolt_logo_Black.svg';
 import LogoIcon from '../../imports/Logo_Icon.svg';
@@ -41,9 +42,10 @@ interface SidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   isDark?: boolean;
+  onOpenProjectsHub?: () => void;
 }
 
-export function Sidebar({ isCollapsed, onToggle, activeTab, onTabChange, isDark }: SidebarProps) {
+export function Sidebar({ isCollapsed, onToggle, activeTab, onTabChange, isDark, onOpenProjectsHub }: SidebarProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState<number | null>(null);
   const [subMenuHeights, setSubMenuHeights] = useState<Record<number, number>>({});
@@ -140,6 +142,30 @@ export function Sidebar({ isCollapsed, onToggle, activeTab, onTabChange, isDark 
         )}
 
         <ul className="flex flex-col gap-1">
+          {onOpenProjectsHub && (
+            <li className="mb-2">
+              <button
+                onClick={onOpenProjectsHub}
+                title={!isExpanded ? 'Transvolt All Projects' : undefined}
+                className={`
+                  menu-item group w-full text-left bg-gradient-to-r from-[#548235]/15 to-[#4472C4]/15 hover:from-[#548235]/25 hover:to-[#4472C4]/25 border border-[#548235]/40 text-gray-800 dark:text-gray-100 font-semibold shadow-xs
+                  ${!isExpanded ? 'justify-center px-2' : ''}
+                `}
+              >
+                <span className="menu-item-icon-size flex-shrink-0 text-[#548235]">
+                  <Boxes size={20} />
+                </span>
+                {isExpanded && (
+                  <div className="flex items-center justify-between flex-1">
+                    <span className="text-sm font-semibold tracking-tight">All Projects</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#548235] text-white font-mono font-bold shadow-xs">
+                      Hub
+                    </span>
+                  </div>
+                )}
+              </button>
+            </li>
+          )}
           {navItems.map((item, index) => (
             <li key={item.label}>
               <button

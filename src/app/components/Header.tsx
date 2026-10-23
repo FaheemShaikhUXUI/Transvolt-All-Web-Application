@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import { Search, Bell, Calendar, ChevronDown, Sun, Moon, Menu, X } from 'lucide-react';
+import { Search, Bell, Calendar, ChevronDown, Sun, Moon, Menu, X, Boxes } from 'lucide-react';
 
 interface HeaderProps {
   onSectorChange?: (sector: string) => void;
@@ -8,6 +8,7 @@ interface HeaderProps {
   isDark?: boolean;
   onToggleDark?: () => void;
   onToggleSidebar?: () => void;
+  onOpenProjectsHub?: () => void;
 }
 
 export function Header({
@@ -17,6 +18,7 @@ export function Header({
   isDark = false,
   onToggleDark,
   onToggleSidebar,
+  onOpenProjectsHub,
 }: HeaderProps) {
   const sectors = ['Public Sector', 'Mine Sector', 'Port Sector', 'Cement Sector'];
   const projects = ['Project Alpha', 'Project Beta', 'Project Gamma'];
@@ -78,6 +80,17 @@ export function Header({
 
         {/* Right Actions */}
         <div className="ml-auto flex items-center gap-2">
+          {/* Back to All Projects Hub Button */}
+          {onOpenProjectsHub && (
+            <button
+              onClick={onOpenProjectsHub}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-[#548235] to-[#4472C4] hover:from-[#60993d] hover:to-[#5084df] shadow-xs hover:shadow-md transition-all cursor-pointer"
+              title="Return to Transvolt All Projects Portal"
+            >
+              <Boxes size={15} />
+              <span className="hidden sm:inline">All Projects</span>
+            </button>
+          )}
 
           {/* Dark Mode Toggle */}
           <button

@@ -6,9 +6,11 @@ import { MineSectorDashboard } from './components/dashboards/MineSectorDashboard
 import { PortSectorDashboard } from './components/dashboards/PortSectorDashboard';
 import { CementSectorDashboard } from './components/dashboards/CementSectorDashboard';
 import { MISReportDashboard } from './components/dashboards/MISReportDashboard';
+import { TransvoltAllProjects } from './components/TransvoltAllProjects';
 import { ChevronRight } from 'lucide-react';
 
 export default function App() {
+  const [currentView, setCurrentView] = useState<'projects' | 'dashboard'>('projects');
   const [activeTab, setActiveTab] = useState('MIS Report');
   const [currentSector, setCurrentSector] = useState('Public Sector');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -58,6 +60,17 @@ export default function App() {
     }
   };
 
+  if (currentView === 'projects') {
+    return (
+      <TransvoltAllProjects
+        onOpenMISDashboard={() => {
+          setActiveTab('MIS Report');
+          setCurrentView('dashboard');
+        }}
+      />
+    );
+  }
+
   return (
     <div className={`flex h-screen bg-gray-50 ${isDark ? 'dark' : ''}`}>
       {/* Sidebar */}
@@ -67,6 +80,7 @@ export default function App() {
         activeTab={activeTab}
         onTabChange={handleTabChange}
         isDark={isDark}
+        onOpenProjectsHub={() => setCurrentView('projects')}
       />
 
       {/* Main Content — offset by sidebar width */}
@@ -82,6 +96,7 @@ export default function App() {
           isDark={isDark}
           onToggleDark={() => setIsDark(!isDark)}
           onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          onOpenProjectsHub={() => setCurrentView('projects')}
         />
 
         {/* Dashboard Content */}
