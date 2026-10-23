@@ -1472,6 +1472,8 @@ function SuperGlassProjectTile({ item, index = 1, onVisit, onDownload, onSetStat
     setTempRepo(item.repoUrl || '');
   }, [item.repoUrl]);
 
+  const hasCodeFile = Boolean(item.repoUrl && item.repoUrl.trim()) || item.id === 'mis-dashboard' || item.name.toLowerCase().includes('branding');
+
   useEffect(() => {
     const handleOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -1619,19 +1621,32 @@ function SuperGlassProjectTile({ item, index = 1, onVisit, onDownload, onSetStat
 
       {/* Right Controls: Download Circle + Green Pill 'Visit' (or Inactive state) + 3-Dots Menu */}
       <div className={`relative flex items-center gap-2 flex-shrink-0 ${menuOpen ? 'z-50' : 'z-10'}`} ref={menuRef}>
-        {/* Simple Green Circle with Download Icon on Left Side of Visit Button - Uniformly Placed on All Tiles */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDownload?.();
-          }}
-          title="Download Complete Project Code (.zip)"
-          aria-label="Download Complete Project Code"
-          className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#10b981] hover:bg-[#059669] text-white flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 shadow-[0_2px_8px_rgba(16,185,129,0.35)] cursor-pointer flex-shrink-0"
-        >
-          <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white stroke-[2.2]" />
-        </button>
+        {/* Stroke-Type Green Circle Download Button (Active if code file/repo connected, Inactive otherwise) */}
+        {hasCodeFile ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDownload?.();
+            }}
+            title="Download Project Code (.zip)"
+            aria-label="Download Project Code"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-[1.5px] border-[#10b981] text-[#10b981] bg-transparent hover:bg-[#10b981]/15 hover:border-[#34d399] flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 shadow-[0_0_10px_rgba(16,185,129,0.25)] cursor-pointer flex-shrink-0"
+          >
+            <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#10b981] stroke-[2.2]" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            disabled
+            onClick={(e) => e.stopPropagation()}
+            title="No code file connected yet (Use 3-dots menu to link GitHub repo)"
+            aria-label="No code file connected"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-white/15 text-gray-500 bg-white/[0.03] flex items-center justify-center cursor-not-allowed opacity-45 flex-shrink-0"
+          >
+            <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500 stroke-[1.8]" />
+          </button>
+        )}
 
         {item.isConnected ? (
           <button
