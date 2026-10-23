@@ -507,8 +507,13 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
     );
   };
 
-  // Add Project
-  const handleAddProject = (name: string, status: ProjectStatusType, category: 'web' | 'mobile' | 'other') => {
+  // Add Project (with optional visit link)
+  const handleAddProject = (
+    name: string,
+    status: ProjectStatusType,
+    category: 'web' | 'mobile' | 'other',
+    linkUrl?: string
+  ) => {
     let label = 'Planning';
     if (status === 'live') {
       const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -521,16 +526,33 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
       label = 'Planning';
     }
 
+    const hasLink = Boolean(linkUrl && linkUrl.trim());
     const newProject: ProjectEntry = {
       id: `project-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       name: name.trim(),
       category,
       status,
       statusLabel: label,
-      isConnected: false,
+      linkUrl: hasLink ? linkUrl!.trim() : undefined,
+      isConnected: hasLink,
     };
 
     setProjectsData(prev => [newProject, ...prev]);
+  };
+
+  // Update Project Visit Link
+  const handleUpdateProjectLink = (id: string, newLink: string) => {
+    setProjectsData(prev =>
+      prev.map(p => {
+        if (p.id !== id) return p;
+        const hasLink = Boolean(newLink && newLink.trim());
+        return {
+          ...p,
+          linkUrl: hasLink ? newLink.trim() : undefined,
+          isConnected: hasLink,
+        };
+      })
+    );
   };
 
   // Compute status counts for top summary bar
@@ -623,14 +645,14 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                 ? 'bg-white/[0.14] ring-2 ring-white/60 scale-[1.01]'
                 : 'bg-white/[0.08] hover:bg-white/[0.12] hover:-translate-y-0.5'
             }`}
-            style={{ minHeight: '108px' }}
+            style={{ minHeight: '118px' }}
           >
             {/* Top Gloss Reflection */}
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.08] to-transparent opacity-80" />
 
-            {/* Tile Name */}
+            {/* Tile Name (100% Larger) */}
             <div className="relative z-10 w-full">
-              <span className="text-xs sm:text-sm font-semibold text-white/95 tracking-wide">
+              <span className="text-base sm:text-lg md:text-xl font-extrabold text-white tracking-tight drop-shadow-sm">
                 All Projects
               </span>
             </div>
@@ -661,14 +683,14 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                 ? 'bg-white/[0.14] ring-2 ring-white/60 scale-[1.01]'
                 : 'bg-white/[0.08] hover:bg-white/[0.12] hover:-translate-y-0.5'
             }`}
-            style={{ minHeight: '108px' }}
+            style={{ minHeight: '118px' }}
           >
             {/* Top Gloss Reflection */}
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.08] to-transparent opacity-80" />
 
-            {/* Tile Name */}
+            {/* Tile Name (100% Larger) */}
             <div className="relative z-10 w-full">
-              <span className="text-xs sm:text-sm font-semibold text-white/95 tracking-wide">
+              <span className="text-base sm:text-lg md:text-xl font-extrabold text-white tracking-tight drop-shadow-sm">
                 Live Projects
               </span>
             </div>
@@ -699,14 +721,14 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                 ? 'bg-white/[0.14] ring-2 ring-white/60 scale-[1.01]'
                 : 'bg-white/[0.08] hover:bg-white/[0.12] hover:-translate-y-0.5'
             }`}
-            style={{ minHeight: '108px' }}
+            style={{ minHeight: '118px' }}
           >
             {/* Top Gloss Reflection */}
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.08] to-transparent opacity-80" />
 
-            {/* Tile Name */}
+            {/* Tile Name (100% Larger) */}
             <div className="relative z-10 w-full">
-              <span className="text-xs sm:text-sm font-semibold text-white/95 tracking-wide">
+              <span className="text-base sm:text-lg md:text-xl font-extrabold text-white tracking-tight drop-shadow-sm">
                 Working
               </span>
             </div>
@@ -737,14 +759,14 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                 ? 'bg-white/[0.14] ring-2 ring-white/60 scale-[1.01]'
                 : 'bg-white/[0.08] hover:bg-white/[0.12] hover:-translate-y-0.5'
             }`}
-            style={{ minHeight: '108px' }}
+            style={{ minHeight: '118px' }}
           >
             {/* Top Gloss Reflection */}
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.08] to-transparent opacity-80" />
 
-            {/* Tile Name */}
+            {/* Tile Name (100% Larger) */}
             <div className="relative z-10 w-full">
-              <span className="text-xs sm:text-sm font-semibold text-white/95 tracking-wide">
+              <span className="text-base sm:text-lg md:text-xl font-extrabold text-white tracking-tight drop-shadow-sm">
                 Hold
               </span>
             </div>
@@ -775,14 +797,14 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                 ? 'bg-white/[0.14] ring-2 ring-white/60 scale-[1.01]'
                 : 'bg-white/[0.08] hover:bg-white/[0.12] hover:-translate-y-0.5'
             }`}
-            style={{ minHeight: '108px' }}
+            style={{ minHeight: '118px' }}
           >
             {/* Top Gloss Reflection */}
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.08] to-transparent opacity-80" />
 
-            {/* Tile Name */}
+            {/* Tile Name (100% Larger) */}
             <div className="relative z-10 w-full">
-              <span className="text-xs sm:text-sm font-semibold text-white/95 tracking-wide">
+              <span className="text-base sm:text-lg md:text-xl font-extrabold text-white tracking-tight drop-shadow-sm">
                 Under Planning
               </span>
             </div>
@@ -823,12 +845,12 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
           >
             {/* Column Header: Headline with Icon and Total Count Badge */}
             <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-white/[0.06]">
-              <div className="flex items-center gap-2">
-                <Monitor className="w-5 h-5 text-[#86efac]" />
-                <h2 className="text-[17px] sm:text-lg font-bold text-white tracking-wide">
+              <div className="flex items-center gap-2.5">
+                <Monitor className="w-6 h-6 text-[#86efac]" />
+                <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-wide">
                   All Web Application
                 </h2>
-                <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                   {webTotalCount}
                 </span>
               </div>
@@ -840,7 +862,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                 <AddProjectPopout
                   category="web"
                   categoryTitle="Web Application"
-                  onAdd={(name, status) => handleAddProject(name, status, 'web')}
+                  onAdd={(name, status, linkUrl) => handleAddProject(name, status, 'web', linkUrl)}
                 />
                 <div className="relative w-28 sm:w-32">
                   <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
@@ -867,6 +889,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                   onDelete={() => handleDeleteProject(item.id)}
                   onRename={(newName) => handleRenameProject(item.id, newName)}
                   onReorder={handleReorderProject}
+                  onUpdateLink={(newLink) => handleUpdateProjectLink(item.id, newLink)}
                 />
               ))}
               {webList.length === 0 && (
@@ -892,12 +915,12 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
           >
             {/* Column Header: Headline with Icon and Total Count Badge */}
             <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-white/[0.06]">
-              <div className="flex items-center gap-2">
-                <Smartphone className="w-5 h-5 text-[#93c5fd]" />
-                <h2 className="text-[17px] sm:text-lg font-bold text-white tracking-wide">
+              <div className="flex items-center gap-2.5">
+                <Smartphone className="w-6 h-6 text-[#93c5fd]" />
+                <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-wide">
                   All Mobile Application
                 </h2>
-                <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
                   {mobileTotalCount}
                 </span>
               </div>
@@ -909,7 +932,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                 <AddProjectPopout
                   category="mobile"
                   categoryTitle="Mobile Application"
-                  onAdd={(name, status) => handleAddProject(name, status, 'mobile')}
+                  onAdd={(name, status, linkUrl) => handleAddProject(name, status, 'mobile', linkUrl)}
                 />
                 <div className="relative w-28 sm:w-32">
                   <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
@@ -936,6 +959,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                   onDelete={() => handleDeleteProject(item.id)}
                   onRename={(newName) => handleRenameProject(item.id, newName)}
                   onReorder={handleReorderProject}
+                  onUpdateLink={(newLink) => handleUpdateProjectLink(item.id, newLink)}
                 />
               ))}
               {mobileList.length === 0 && (
@@ -961,12 +985,12 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
           >
             {/* Column Header: Headline with Icon and Total Count Badge */}
             <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-white/[0.06]">
-              <div className="flex items-center gap-2">
-                <Cpu className="w-5 h-5 text-purple-400" />
-                <h2 className="text-[17px] sm:text-lg font-bold text-white tracking-wide">
+              <div className="flex items-center gap-2.5">
+                <Cpu className="w-6 h-6 text-purple-400" />
+                <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-wide">
                   Other Projects
                 </h2>
-                <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">
                   {otherTotalCount}
                 </span>
               </div>
@@ -978,7 +1002,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                 <AddProjectPopout
                   category="other"
                   categoryTitle="Other Projects"
-                  onAdd={(name, status) => handleAddProject(name, status, 'other')}
+                  onAdd={(name, status, linkUrl) => handleAddProject(name, status, 'other', linkUrl)}
                 />
                 <div className="relative w-28 sm:w-32">
                   <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
@@ -1005,6 +1029,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                   onDelete={() => handleDeleteProject(item.id)}
                   onRename={(newName) => handleRenameProject(item.id, newName)}
                   onReorder={handleReorderProject}
+                  onUpdateLink={(newLink) => handleUpdateProjectLink(item.id, newLink)}
                 />
               ))}
               {otherList.length === 0 && (
@@ -1098,16 +1123,17 @@ function ColumnFilterDropdown({ currentFilter, onSelect }: ColumnFilterDropdownP
   );
 }
 
-// 4b. Add Project Popout Component (Project Name & Project Status)
+// 4b. Add Project Popout Component (Project Name, Project Status & Paste Link to Visit)
 interface AddProjectPopoutProps {
   category: 'web' | 'mobile' | 'other';
   categoryTitle: string;
-  onAdd: (name: string, status: ProjectStatusType) => void;
+  onAdd: (name: string, status: ProjectStatusType, linkUrl?: string) => void;
 }
 
 function AddProjectPopout({ categoryTitle, onAdd }: AddProjectPopoutProps) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
+  const [linkUrl, setLinkUrl] = useState('');
   const [status, setStatus] = useState<ProjectStatusType>('working');
   const popoutRef = useRef<HTMLDivElement | null>(null);
 
@@ -1126,8 +1152,9 @@ function AddProjectPopout({ categoryTitle, onAdd }: AddProjectPopoutProps) {
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!name.trim()) return;
-    onAdd(name.trim(), status);
+    onAdd(name.trim(), status, linkUrl.trim() || undefined);
     setName('');
+    setLinkUrl('');
     setStatus('working');
     setOpen(false);
   };
@@ -1183,6 +1210,20 @@ function AddProjectPopout({ categoryTitle, onAdd }: AddProjectPopoutProps) {
                 placeholder="Enter project name..."
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                className="w-full px-2.5 py-1.5 rounded-lg bg-black/60 border border-white/15 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#10b981] transition-colors"
+              />
+            </div>
+
+            {/* Field: Paste Link to Visit */}
+            <div>
+              <label className="block text-[11px] font-semibold text-gray-300 mb-1">
+                Paste Link to Visit
+              </label>
+              <input
+                type="url"
+                placeholder="https://... (or leave blank if not connected)"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
                 className="w-full px-2.5 py-1.5 rounded-lg bg-black/60 border border-white/15 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#10b981] transition-colors"
               />
             </div>
@@ -1249,13 +1290,16 @@ interface SuperGlassProjectTileProps {
   onDelete: () => void;
   onRename: (newName: string) => void;
   onReorder?: (sourceId: string, targetId: string) => void;
+  onUpdateLink?: (newLink: string) => void;
 }
 
-function SuperGlassProjectTile({ item, index = 1, onVisit, onSetStatus, onDelete, onRename, onReorder }: SuperGlassProjectTileProps) {
+function SuperGlassProjectTile({ item, index = 1, onVisit, onSetStatus, onDelete, onRename, onReorder, onUpdateLink }: SuperGlassProjectTileProps) {
   const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [menuOpen, setMenuOpen] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
+  const [isEditingLink, setIsEditingLink] = useState(false);
   const [tempName, setTempName] = useState(item.name);
+  const [tempLink, setTempLink] = useState(item.linkUrl || '');
   const [isDragOver, setIsDragOver] = useState(false);
   const tileRef = useRef<HTMLDivElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -1263,6 +1307,10 @@ function SuperGlassProjectTile({ item, index = 1, onVisit, onSetStatus, onDelete
   useEffect(() => {
     setTempName(item.name);
   }, [item.name]);
+
+  useEffect(() => {
+    setTempLink(item.linkUrl || '');
+  }, [item.linkUrl]);
 
   useEffect(() => {
     const handleOutside = (e: MouseEvent) => {
@@ -1535,6 +1583,49 @@ function SuperGlassProjectTile({ item, index = 1, onVisit, onSetStatus, onDelete
               <Pencil className="w-3.5 h-3.5 text-sky-400" />
               <span>Rename Project</span>
             </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsEditingLink(!isEditingLink);
+              }}
+              className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-200 hover:bg-white/10 hover:text-white cursor-pointer"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-[#10b981]" />
+              <span>Paste Link to Visit</span>
+            </button>
+
+            {isEditingLink && (
+              <div className="p-2 bg-black/80 rounded-lg border border-white/20 mt-1 flex flex-col gap-1.5">
+                <input
+                  type="url"
+                  placeholder="Paste URL (https://...)"
+                  value={tempLink}
+                  onChange={(e) => setTempLink(e.target.value)}
+                  className="w-full px-2 py-1 rounded bg-black/90 border border-white/25 text-[11px] text-white placeholder-gray-500 focus:outline-none focus:border-[#10b981]"
+                />
+                <div className="flex items-center justify-end gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingLink(false)}
+                    className="px-2 py-0.5 rounded text-[10px] text-gray-400 hover:text-white cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onUpdateLink?.(tempLink.trim());
+                      setIsEditingLink(false);
+                      setMenuOpen(false);
+                    }}
+                    className="px-2.5 py-0.5 rounded text-[10px] font-semibold bg-[#10b981] hover:bg-[#059669] text-white cursor-pointer"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
