@@ -1474,9 +1474,9 @@ function SuperGlassProjectTile({ item, index = 1, onVisit, onDownload, onSetStat
         </div>
       </div>
 
-      {/* Right Controls: Green Pill 'Visit' (or Inactive state) + Download Circle + 3-Dots Menu */}
-      <div className={`relative flex items-center gap-1.5 flex-shrink-0 ${menuOpen ? 'z-50' : 'z-10'}`} ref={menuRef}>
-        {/* Simple Green Circle with Download Icon on Left Side of Visit Button */}
+      {/* Right Controls: Download Circle + Green Pill 'Visit' (or Inactive state) + 3-Dots Menu */}
+      <div className={`relative flex items-center gap-2 flex-shrink-0 ${menuOpen ? 'z-50' : 'z-10'}`} ref={menuRef}>
+        {/* Simple Green Circle with Download Icon on Left Side of Visit Button - Uniformly Placed on All Tiles */}
         <button
           type="button"
           onClick={(e) => {
@@ -1485,9 +1485,9 @@ function SuperGlassProjectTile({ item, index = 1, onVisit, onDownload, onSetStat
           }}
           title="Download Complete Project Code (.zip)"
           aria-label="Download Complete Project Code"
-          className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-[#10b981] hover:bg-[#059669] text-white flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 shadow-[0_2px_8px_rgba(16,185,129,0.35)] cursor-pointer flex-shrink-0"
+          className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#10b981] hover:bg-[#059669] text-white flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 shadow-[0_2px_8px_rgba(16,185,129,0.35)] cursor-pointer flex-shrink-0"
         >
-          <Download className="w-3.5 h-3.5 text-white stroke-[2.2]" />
+          <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white stroke-[2.2]" />
         </button>
 
         {item.isConnected ? (
@@ -1497,7 +1497,7 @@ function SuperGlassProjectTile({ item, index = 1, onVisit, onDownload, onSetStat
               e.stopPropagation();
               onVisit();
             }}
-            className="px-4 sm:px-5 py-1 sm:py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer shadow-sm bg-[#10b981] hover:bg-[#059669] text-white hover:scale-105 active:scale-95 shadow-[0_2px_10px_rgba(16,185,129,0.35)]"
+            className="w-[68px] sm:w-[74px] py-1 sm:py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer shadow-sm bg-[#10b981] hover:bg-[#059669] text-white hover:scale-105 active:scale-95 shadow-[0_2px_10px_rgba(16,185,129,0.35)] flex items-center justify-center text-center flex-shrink-0"
           >
             Visit
           </button>
@@ -1506,8 +1506,8 @@ function SuperGlassProjectTile({ item, index = 1, onVisit, onDownload, onSetStat
             type="button"
             disabled
             onClick={(e) => e.stopPropagation()}
-            title="Project link not connected yet"
-            className="px-3.5 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs font-semibold tracking-wide cursor-not-allowed bg-white/[0.04] border border-white/10 text-gray-500 opacity-55 flex items-center gap-1"
+            title="Project link not connected yet (Use 3-dots menu to paste link)"
+            className="w-[68px] sm:w-[74px] py-1 sm:py-1.5 rounded-full text-xs font-semibold tracking-wide cursor-not-allowed bg-white/[0.04] border border-white/10 text-gray-500 opacity-55 flex items-center justify-center gap-1 text-center flex-shrink-0"
           >
             <Link2Off className="w-3 h-3 text-gray-500" />
             <span>Visit</span>
@@ -1521,8 +1521,8 @@ function SuperGlassProjectTile({ item, index = 1, onVisit, onDownload, onSetStat
             e.stopPropagation();
             setMenuOpen(!menuOpen);
           }}
-          className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-          title="Project Options"
+          className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer flex-shrink-0"
+          title="Project Options (Rename, Update Link, Delete, Set Status)"
         >
           <MoreVertical size={16} />
         </button>
@@ -1623,7 +1623,7 @@ function SuperGlassProjectTile({ item, index = 1, onVisit, onDownload, onSetStat
               className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-200 hover:bg-white/10 hover:text-white cursor-pointer"
             >
               <ExternalLink className="w-3.5 h-3.5 text-[#10b981]" />
-              <span>Paste Link to Visit</span>
+              <span>Update / Paste Link to Visit</span>
             </button>
 
             {isEditingLink && (
