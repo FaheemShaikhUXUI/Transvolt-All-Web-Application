@@ -652,7 +652,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
 
             {/* Tile Name (100% Larger) */}
             <div className="relative z-10 w-full">
-              <span className="text-base sm:text-lg md:text-xl font-extrabold text-white tracking-tight drop-shadow-sm">
+              <span className="text-base sm:text-lg md:text-xl font-extrabold text-white tracking-tight drop-shadow-sm whitespace-nowrap">
                 All Projects
               </span>
             </div>
@@ -690,7 +690,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
 
             {/* Tile Name (100% Larger) */}
             <div className="relative z-10 w-full">
-              <span className="text-base sm:text-lg md:text-xl font-extrabold text-white tracking-tight drop-shadow-sm">
+              <span className="text-base sm:text-lg md:text-xl font-extrabold text-white tracking-tight drop-shadow-sm whitespace-nowrap">
                 Live Projects
               </span>
             </div>
@@ -728,7 +728,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
 
             {/* Tile Name (100% Larger) */}
             <div className="relative z-10 w-full">
-              <span className="text-base sm:text-lg md:text-xl font-extrabold text-white tracking-tight drop-shadow-sm">
+              <span className="text-base sm:text-lg md:text-xl font-extrabold text-white tracking-tight drop-shadow-sm whitespace-nowrap">
                 Working
               </span>
             </div>
@@ -766,7 +766,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
 
             {/* Tile Name (100% Larger) */}
             <div className="relative z-10 w-full">
-              <span className="text-base sm:text-lg md:text-xl font-extrabold text-white tracking-tight drop-shadow-sm">
+              <span className="text-base sm:text-lg md:text-xl font-extrabold text-white tracking-tight drop-shadow-sm whitespace-nowrap">
                 Hold
               </span>
             </div>
@@ -804,7 +804,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
 
             {/* Tile Name (100% Larger) */}
             <div className="relative z-10 w-full">
-              <span className="text-base sm:text-lg md:text-xl font-extrabold text-white tracking-tight drop-shadow-sm">
+              <span className="text-base sm:text-lg md:text-xl font-extrabold text-white tracking-tight drop-shadow-sm whitespace-nowrap">
                 Under Planning
               </span>
             </div>
@@ -845,12 +845,12 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
           >
             {/* Column Header: Headline with Icon and Total Count Badge */}
             <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-white/[0.06]">
-              <div className="flex items-center gap-2.5">
-                <Monitor className="w-6 h-6 text-[#86efac]" />
-                <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-wide">
+              <div className="flex items-center gap-2.5 flex-nowrap min-w-0">
+                <Monitor className="w-5 h-5 sm:w-6 sm:h-6 text-[#86efac] flex-shrink-0" />
+                <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold text-white tracking-wide whitespace-nowrap">
                   All Web Application
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex-shrink-0">
                   {webTotalCount}
                 </span>
               </div>
@@ -915,12 +915,12 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
           >
             {/* Column Header: Headline with Icon and Total Count Badge */}
             <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-white/[0.06]">
-              <div className="flex items-center gap-2.5">
-                <Smartphone className="w-6 h-6 text-[#93c5fd]" />
-                <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-wide">
+              <div className="flex items-center gap-2.5 flex-nowrap min-w-0">
+                <Smartphone className="w-5 h-5 sm:w-6 sm:h-6 text-[#93c5fd] flex-shrink-0" />
+                <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold text-white tracking-wide whitespace-nowrap">
                   All Mobile Application
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30 flex-shrink-0">
                   {mobileTotalCount}
                 </span>
               </div>
@@ -985,12 +985,12 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
           >
             {/* Column Header: Headline with Icon and Total Count Badge */}
             <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-white/[0.06]">
-              <div className="flex items-center gap-2.5">
-                <Cpu className="w-6 h-6 text-purple-400" />
-                <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-wide">
+              <div className="flex items-center gap-2.5 flex-nowrap min-w-0">
+                <Cpu className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400 flex-shrink-0" />
+                <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold text-white tracking-wide whitespace-nowrap">
                   Other Projects
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30 flex-shrink-0">
                   {otherTotalCount}
                 </span>
               </div>
