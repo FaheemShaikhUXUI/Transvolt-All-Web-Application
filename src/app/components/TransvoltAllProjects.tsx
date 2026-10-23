@@ -47,7 +47,8 @@ function AnimatedWaveBackground() {
       const width = window.innerWidth;
       const height = window.innerHeight;
 
-      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, width, height);
       t += 0.0052;
 
       mouseX += (targetMouseX - mouseX) * 0.1;
@@ -220,7 +221,7 @@ function AnimatedWaveBackground() {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden flex items-center justify-center">
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden flex items-center justify-center bg-black">
       <canvas
         ref={canvasRef}
         className="w-full h-full object-cover"
@@ -601,7 +602,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
       <AnimatedWaveBackground />
 
       {/* Main Page Scrollable Container */}
-      <div className="relative z-10 flex flex-col flex-1 w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-5">
+      <div className="relative z-10 flex flex-col flex-1 w-full max-w-[1920px] mx-auto px-[10%] py-5">
         {/* 1. Header Bar matching Image */}
         <header className="flex items-center justify-between pt-2 pb-5 mb-8 border-b border-white/[0.08]">
           {/* Left: Official Transvolt Logo */}
