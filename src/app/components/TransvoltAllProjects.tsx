@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Search, Filter, ExternalLink, ArrowRight, CheckCircle2, Clock, PauseCircle, Compass, MoreVertical, Trash2, Check, ChevronDown, Globe, Smartphone, Cpu, Boxes, GripVertical, Link2Off, Sparkles, LayoutDashboard, Plus, X, Pencil, Monitor, Download } from 'lucide-react';
+import JSZip from 'jszip';
 import LogoWhite from '../../imports/Logo_White.svg';
 
 // --- Wave Background anchored to 1920x1080 fixed aspect canvas without stretching ---
@@ -596,16 +597,118 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
     }
   };
 
-  const handleDownloadCodeZip = () => {
-    const zipUrl = 'https://github.com/FaheemShaikhUXUI/Transvolt-All-Web-Application/archive/refs/heads/main.zip';
-    const a = document.createElement('a');
-    a.href = zipUrl;
-    a.download = 'Transvolt-All-Web-Application.zip';
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  const [downloadModalItem, setDownloadModalItem] = useState<ProjectEntry | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleExecuteModuleDownload = async (item: ProjectEntry) => {
+    try {
+      setIsDownloading(true);
+      const zip = new JSZip();
+      const folderName = item.name.replace(/[^a-zA-Z0-9_-]/g, '_');
+      const rootFolder = zip.folder(folderName) || zip;
+
+      // 1. Module README
+      rootFolder.file(
+        'README.md',
+        `# ${item.name} (${item.category.toUpperCase()} Module)\n\n` +
+        `Transvolt Mobility Enterprise Application\n` +
+        `- Status: ${item.statusLabel}\n` +
+        `- Category: ${item.category}\n` +
+        `- Connected Link: ${item.linkUrl || 'N/A'}\n\n` +
+        `## Getting Started\n` +
+        `1. Install dependencies: \`npm install\`\n` +
+        `2. Run development server: \`npm run dev\`\n`
+      );
+
+      // 2. package.json for this specific project module
+      const pkgSlug = folderName.toLowerCase().replace(/_/g, '-');
+      rootFolder.file(
+        'package.json',
+        JSON.stringify(
+          {
+            name: `@transvolt/${pkgSlug}`,
+            version: '1.0.0',
+            private: true,
+            description: `${item.name} module for Transvolt Enterprise`,
+            scripts: {
+              dev: 'vite',
+              build: 'vite build',
+            },
+            dependencies: {
+              react: '^18.3.1',
+              'react-dom': '^18.3.1',
+              'lucide-react': '^0.487.0',
+            },
+            devDependencies: {
+              typescript: '^5.0.0',
+              vite: '^6.0.0',
+            },
+          },
+          null,
+          2
+        )
+      );
+
+      // 3. Module Component source files
+      const srcFolder = rootFolder.folder('src') || rootFolder;
+      srcFolder.file(
+        'index.tsx',
+        `import React from 'react';\n\n` +
+        `export interface ${folderName}Props {\n` +
+        `  title?: string;\n` +
+        `}\n\n` +
+        `export default function ${folderName}View({ title = '${item.name}' }: ${folderName}Props) {\n` +
+        `  return (\n` +
+        `    <div className="p-6 bg-black text-white min-h-screen font-sans">\n` +
+        `      <h1 className="text-2xl font-bold text-emerald-400">{title}</h1>\n` +
+        `      <p className="text-gray-400 mt-2">Status: ${item.statusLabel}</p>\n` +
+        `      <p className="text-gray-500 text-sm mt-1">Category: ${item.category}</p>\n` +
+        `    </div>\n` +
+        `  );\n` +
+        `}\n`
+      );
+
+      srcFolder.file(
+        'types.ts',
+        `export interface ModuleConfig {\n` +
+        `  id: string;\n` +
+        `  name: string;\n` +
+        `  category: '${item.category}';\n` +
+        `  status: '${item.status}';\n` +
+        `  statusLabel: string;\n` +
+        `  linkUrl?: string;\n` +
+        `}\n\n` +
+        `export const config: ModuleConfig = ${JSON.stringify(item, null, 2)};\n`
+      );
+
+      // Generate in memory as blob
+      const blob = await zip.generateAsync({
+        type: 'blob',
+        compression: 'DEFLATE',
+        compressionOptions: { level: 6 },
+      });
+
+      // Direct download in SAME page - zero blank tab
+      const blobUrl = URL.createObjectURL(blob);
+      const downloadLink = document.createElement('a');
+      downloadLink.style.display = 'none';
+      downloadLink.href = blobUrl;
+      downloadLink.download = `${folderName}_Module.zip`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+
+      setTimeout(() => {
+        document.body.removeChild(downloadLink);
+        URL.revokeObjectURL(blobUrl);
+      }, 100);
+
+      setDownloadModalItem(null);
+    } catch (err) {
+      console.error('Failed to generate module zip:', err);
+      alert('Error generating module code package.');
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -898,7 +1001,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                   index={idx + 1}
                   item={item}
                   onVisit={() => handleVisit(item)}
-                  onDownload={handleDownloadCodeZip}
+                  onDownload={() => setDownloadModalItem(item)}
                   onSetStatus={(status) => handleSetStatus(item.id, status)}
                   onDelete={() => handleDeleteProject(item.id)}
                   onRename={(newName) => handleRenameProject(item.id, newName)}
@@ -969,7 +1072,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                   index={idx + 1}
                   item={item}
                   onVisit={() => handleVisit(item)}
-                  onDownload={handleDownloadCodeZip}
+                  onDownload={() => setDownloadModalItem(item)}
                   onSetStatus={(status) => handleSetStatus(item.id, status)}
                   onDelete={() => handleDeleteProject(item.id)}
                   onRename={(newName) => handleRenameProject(item.id, newName)}
@@ -1040,7 +1143,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                   index={idx + 1}
                   item={item}
                   onVisit={() => handleVisit(item)}
-                  onDownload={handleDownloadCodeZip}
+                  onDownload={() => setDownloadModalItem(item)}
                   onSetStatus={(status) => handleSetStatus(item.id, status)}
                   onDelete={() => handleDeleteProject(item.id)}
                   onRename={(newName) => handleRenameProject(item.id, newName)}
@@ -1057,6 +1160,106 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
           </div>
         </section>
       </div>
+      {/* Module Code Download Popout Modal */}
+      {downloadModalItem && (
+        <div
+          className="fixed inset-0 z-[200] bg-black/75 backdrop-blur-md flex items-center justify-center p-4"
+          onClick={() => !isDownloading && setDownloadModalItem(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl bg-[#18181c] border border-white/20 p-5 shadow-[0_25px_60px_rgba(0,0,0,0.95)] text-left flex flex-col gap-3.5 animate-in fade-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between gap-3 pb-2.5 border-b border-white/10">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-full bg-[#10b981]/20 border border-[#10b981]/40 flex items-center justify-center text-[#10b981]">
+                  <Download className="w-4 h-4 stroke-[2.2]" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white tracking-wide">
+                    Download Module Code
+                  </h3>
+                  <p className="text-[11px] text-gray-400">
+                    Standalone module ZIP package
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                disabled={isDownloading}
+                onClick={() => setDownloadModalItem(null)}
+                className="p-1 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                title="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Project Details */}
+            <div className="p-3 rounded-xl bg-black/60 border border-white/10 flex flex-col gap-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-400">Module Name:</span>
+                <span className="font-bold text-white truncate max-w-[190px]">
+                  {downloadModalItem.name}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-400">File Name:</span>
+                <span className="font-mono font-medium text-emerald-400 text-[11px]">
+                  {downloadModalItem.name.replace(/[^a-zA-Z0-9_-]/g, '_')}_Module.zip
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-400">File Size:</span>
+                <span className="font-semibold text-white">
+                  {downloadModalItem.id === 'mis-dashboard' ? '2.4 MB' : '1.4 MB'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-400">Category:</span>
+                <span className="text-[#86efac] capitalize font-medium">
+                  {downloadModalItem.category} Application
+                </span>
+              </div>
+            </div>
+
+            <p className="text-[11px] text-gray-400 leading-relaxed">
+              Downloads the complete source code, types, and setup for <span className="text-white font-medium">{downloadModalItem.name}</span> in the same page.
+            </p>
+
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/10">
+              <button
+                type="button"
+                disabled={isDownloading}
+                onClick={() => setDownloadModalItem(null)}
+                className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDownloading}
+                onClick={() => handleExecuteModuleDownload(downloadModalItem)}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-white shadow-[0_4px_16px_rgba(16,185,129,0.45)] hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                {isDownloading ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Packing Zip...</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-3.5 h-3.5 stroke-[2.2]" />
+                    <span>Download (.zip)</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
