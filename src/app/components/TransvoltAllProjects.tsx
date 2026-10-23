@@ -245,6 +245,7 @@ export interface ProjectEntry {
   isFirst?: boolean;
   isConnected?: boolean;
   linkUrl?: string;
+  repoUrl?: string;
 }
 
 interface TransvoltAllProjectsProps {
@@ -262,6 +263,7 @@ const initialProjectsData: ProjectEntry[] = [
     statusLabel: 'Live Since 09 July 2026',
     isFirst: true,
     isConnected: true, // LIVE CONNECTED
+    repoUrl: 'https://github.com/FaheemShaikhUXUI/Transvolt-All-Web-Application',
   },
   {
     id: 'web-branding-portal',
@@ -271,6 +273,7 @@ const initialProjectsData: ProjectEntry[] = [
     status: 'working',
     statusLabel: 'Working',
     isConnected: false,
+    repoUrl: 'https://github.com/FaheemShaikhUXUI/Transvolt_Branding_Portal_V4',
   },
   {
     id: 'web-corporate-site',
@@ -366,6 +369,7 @@ const initialProjectsData: ProjectEntry[] = [
     statusLabel: 'Live Since 22 October 2026',
     isConnected: true,
     linkUrl: 'https://transvolt-branding-portal-v4-5h2z.vercel.app',
+    repoUrl: 'https://github.com/FaheemShaikhUXUI/Transvolt_Branding_Portal_V4',
   },
   {
     id: 'oth-charging-cms',
@@ -557,6 +561,19 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
     );
   };
 
+  // Update Project GitHub Repo URL
+  const handleUpdateProjectRepo = (id: string, newRepo: string) => {
+    setProjectsData(prev =>
+      prev.map(p => {
+        if (p.id !== id) return p;
+        return {
+          ...p,
+          repoUrl: newRepo && newRepo.trim() ? newRepo.trim() : undefined,
+        };
+      })
+    );
+  };
+
   // Compute status counts for top summary bar
   const counts = useMemo(() => {
     return {
@@ -600,112 +617,36 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
   const [downloadModalItem, setDownloadModalItem] = useState<ProjectEntry | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
+  const getProjectRepoUrl = (item: ProjectEntry): string => {
+    if (item.repoUrl && item.repoUrl.trim()) return item.repoUrl.trim();
+    if (item.id === 'mis-dashboard') return 'https://github.com/FaheemShaikhUXUI/Transvolt-All-Web-Application';
+    if (item.name.toLowerCase().includes('branding')) return 'https://github.com/FaheemShaikhUXUI/Transvolt_Branding_Portal_V4';
+    if (item.name.toLowerCase().includes('mobile')) return 'https://github.com/FaheemShaikhUXUI/Transvolt-All-Mobile-Application';
+    return 'https://github.com/FaheemShaikhUXUI/Transvolt-All-Web-Application';
+  };
+
   const handleExecuteModuleDownload = async (item: ProjectEntry) => {
+    setIsDownloading(true);
     try {
-      setIsDownloading(true);
-      const zip = new JSZip();
-      const folderName = item.name.replace(/[^a-zA-Z0-9_-]/g, '_');
-      const rootFolder = zip.folder(folderName) || zip;
+      const rawRepo = getProjectRepoUrl(item);
+      const cleanRepo = rawRepo.replace(/\.git$/, '').replace(/\/$/, '');
+      const zipUrl = `${cleanRepo}/archive/refs/heads/main.zip`;
 
-      // 1. Module README
-      rootFolder.file(
-        'README.md',
-        `# ${item.name} (${item.category.toUpperCase()} Module)\n\n` +
-        `Transvolt Mobility Enterprise Application\n` +
-        `- Status: ${item.statusLabel}\n` +
-        `- Category: ${item.category}\n` +
-        `- Connected Link: ${item.linkUrl || 'N/A'}\n\n` +
-        `## Getting Started\n` +
-        `1. Install dependencies: \`npm install\`\n` +
-        `2. Run development server: \`npm run dev\`\n`
-      );
-
-      // 2. package.json for this specific project module
-      const pkgSlug = folderName.toLowerCase().replace(/_/g, '-');
-      rootFolder.file(
-        'package.json',
-        JSON.stringify(
-          {
-            name: `@transvolt/${pkgSlug}`,
-            version: '1.0.0',
-            private: true,
-            description: `${item.name} module for Transvolt Enterprise`,
-            scripts: {
-              dev: 'vite',
-              build: 'vite build',
-            },
-            dependencies: {
-              react: '^18.3.1',
-              'react-dom': '^18.3.1',
-              'lucide-react': '^0.487.0',
-            },
-            devDependencies: {
-              typescript: '^5.0.0',
-              vite: '^6.0.0',
-            },
-          },
-          null,
-          2
-        )
-      );
-
-      // 3. Module Component source files
-      const srcFolder = rootFolder.folder('src') || rootFolder;
-      srcFolder.file(
-        'index.tsx',
-        `import React from 'react';\n\n` +
-        `export interface ${folderName}Props {\n` +
-        `  title?: string;\n` +
-        `}\n\n` +
-        `export default function ${folderName}View({ title = '${item.name}' }: ${folderName}Props) {\n` +
-        `  return (\n` +
-        `    <div className="p-6 bg-black text-white min-h-screen font-sans">\n` +
-        `      <h1 className="text-2xl font-bold text-emerald-400">{title}</h1>\n` +
-        `      <p className="text-gray-400 mt-2">Status: ${item.statusLabel}</p>\n` +
-        `      <p className="text-gray-500 text-sm mt-1">Category: ${item.category}</p>\n` +
-        `    </div>\n` +
-        `  );\n` +
-        `}\n`
-      );
-
-      srcFolder.file(
-        'types.ts',
-        `export interface ModuleConfig {\n` +
-        `  id: string;\n` +
-        `  name: string;\n` +
-        `  category: '${item.category}';\n` +
-        `  status: '${item.status}';\n` +
-        `  statusLabel: string;\n` +
-        `  linkUrl?: string;\n` +
-        `}\n\n` +
-        `export const config: ModuleConfig = ${JSON.stringify(item, null, 2)};\n`
-      );
-
-      // Generate in memory as blob
-      const blob = await zip.generateAsync({
-        type: 'blob',
-        compression: 'DEFLATE',
-        compressionOptions: { level: 6 },
-      });
-
-      // Direct download in SAME page - zero blank tab
-      const blobUrl = URL.createObjectURL(blob);
-      const downloadLink = document.createElement('a');
-      downloadLink.style.display = 'none';
-      downloadLink.href = blobUrl;
-      downloadLink.download = `${folderName}_Module.zip`;
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-
+      // Same-page download without opening a new tab
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = zipUrl;
+      document.body.appendChild(iframe);
       setTimeout(() => {
-        document.body.removeChild(downloadLink);
-        URL.revokeObjectURL(blobUrl);
-      }, 100);
+        try {
+          document.body.removeChild(iframe);
+        } catch {}
+      }, 6000);
 
       setDownloadModalItem(null);
     } catch (err) {
-      console.error('Failed to generate module zip:', err);
-      alert('Error generating module code package.');
+      console.error('Failed to download project repo:', err);
+      alert('Error initiating repository download.');
     } finally {
       setIsDownloading(false);
     }
@@ -1007,6 +948,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                   onRename={(newName) => handleRenameProject(item.id, newName)}
                   onReorder={handleReorderProject}
                   onUpdateLink={(newLink) => handleUpdateProjectLink(item.id, newLink)}
+                  onUpdateRepoUrl={(newRepo) => handleUpdateProjectRepo(item.id, newRepo)}
                 />
               ))}
               {webList.length === 0 && (
@@ -1078,6 +1020,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                   onRename={(newName) => handleRenameProject(item.id, newName)}
                   onReorder={handleReorderProject}
                   onUpdateLink={(newLink) => handleUpdateProjectLink(item.id, newLink)}
+                  onUpdateRepoUrl={(newRepo) => handleUpdateProjectRepo(item.id, newRepo)}
                 />
               ))}
               {mobileList.length === 0 && (
@@ -1149,6 +1092,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                   onRename={(newName) => handleRenameProject(item.id, newName)}
                   onReorder={handleReorderProject}
                   onUpdateLink={(newLink) => handleUpdateProjectLink(item.id, newLink)}
+                  onUpdateRepoUrl={(newRepo) => handleUpdateProjectRepo(item.id, newRepo)}
                 />
               ))}
               {otherList.length === 0 && (
@@ -1178,10 +1122,10 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-white tracking-wide">
-                    Download Module Code
+                    Download Project Code
                   </h3>
                   <p className="text-[11px] text-gray-400">
-                    Standalone module ZIP package
+                    GitHub Repository Code Archive (.zip)
                   </p>
                 </div>
               </div>
@@ -1199,22 +1143,20 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
             {/* Project Details */}
             <div className="p-3 rounded-xl bg-black/60 border border-white/10 flex flex-col gap-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-gray-400">Module Name:</span>
+                <span className="text-gray-400">Project / Module:</span>
                 <span className="font-bold text-white truncate max-w-[190px]">
                   {downloadModalItem.name}
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-gray-400">File Name:</span>
-                <span className="font-mono font-medium text-emerald-400 text-[11px]">
-                  {downloadModalItem.name.replace(/[^a-zA-Z0-9_-]/g, '_')}_Module.zip
+                <span className="text-gray-400">Source GitHub Repo:</span>
+                <span className="font-mono font-medium text-sky-400 text-[11px] truncate max-w-[190px]" title={getProjectRepoUrl(downloadModalItem)}>
+                  {getProjectRepoUrl(downloadModalItem).replace('https://github.com/', '')}
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-gray-400">File Size:</span>
-                <span className="font-semibold text-white">
-                  {downloadModalItem.id === 'mis-dashboard' ? '2.4 MB' : '1.4 MB'}
-                </span>
+                <span className="text-gray-400">Branch:</span>
+                <span className="font-semibold text-emerald-400">main (Complete Codebase)</span>
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-gray-400">Category:</span>
@@ -1225,7 +1167,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
             </div>
 
             <p className="text-[11px] text-gray-400 leading-relaxed">
-              Downloads the complete source code, types, and setup for <span className="text-white font-medium">{downloadModalItem.name}</span> in the same page.
+              Downloads the complete, real project codebase directly from its linked GitHub repository in the same page.
             </p>
 
             {/* Actions */}
@@ -1244,17 +1186,8 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                 onClick={() => handleExecuteModuleDownload(downloadModalItem)}
                 className="px-4 py-2 rounded-xl text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-white shadow-[0_4px_16px_rgba(16,185,129,0.45)] hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
               >
-                {isDownloading ? (
-                  <>
-                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Packing Zip...</span>
-                  </>
-                ) : (
-                  <>
-                    <Download className="w-3.5 h-3.5 stroke-[2.2]" />
-                    <span>Download (.zip)</span>
-                  </>
-                )}
+                <Download className="w-3.5 h-3.5 stroke-[2.2]" />
+                <span>Download Complete Code (.zip)</span>
               </button>
             </div>
           </div>
@@ -1511,15 +1444,18 @@ interface SuperGlassProjectTileProps {
   onRename: (newName: string) => void;
   onReorder?: (sourceId: string, targetId: string) => void;
   onUpdateLink?: (newLink: string) => void;
+  onUpdateRepoUrl?: (newRepo: string) => void;
 }
 
-function SuperGlassProjectTile({ item, index = 1, onVisit, onDownload, onSetStatus, onDelete, onRename, onReorder, onUpdateLink }: SuperGlassProjectTileProps) {
+function SuperGlassProjectTile({ item, index = 1, onVisit, onDownload, onSetStatus, onDelete, onRename, onReorder, onUpdateLink, onUpdateRepoUrl }: SuperGlassProjectTileProps) {
   const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [menuOpen, setMenuOpen] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const [isEditingLink, setIsEditingLink] = useState(false);
+  const [isEditingRepo, setIsEditingRepo] = useState(false);
   const [tempName, setTempName] = useState(item.name);
   const [tempLink, setTempLink] = useState(item.linkUrl || '');
+  const [tempRepo, setTempRepo] = useState(item.repoUrl || '');
   const [isDragOver, setIsDragOver] = useState(false);
   const tileRef = useRef<HTMLDivElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -1531,6 +1467,10 @@ function SuperGlassProjectTile({ item, index = 1, onVisit, onDownload, onSetStat
   useEffect(() => {
     setTempLink(item.linkUrl || '');
   }, [item.linkUrl]);
+
+  useEffect(() => {
+    setTempRepo(item.repoUrl || '');
+  }, [item.repoUrl]);
 
   useEffect(() => {
     const handleOutside = (e: MouseEvent) => {
@@ -1822,6 +1762,7 @@ function SuperGlassProjectTile({ item, index = 1, onVisit, onDownload, onSetStat
               type="button"
               onClick={() => {
                 setIsEditingLink(!isEditingLink);
+                setIsEditingRepo(false);
               }}
               className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-200 hover:bg-white/10 hover:text-white cursor-pointer"
             >
@@ -1856,6 +1797,50 @@ function SuperGlassProjectTile({ item, index = 1, onVisit, onDownload, onSetStat
                     className="px-2.5 py-0.5 rounded text-[10px] font-semibold bg-[#10b981] hover:bg-[#059669] text-white cursor-pointer"
                   >
                     Save
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsEditingRepo(!isEditingRepo);
+                setIsEditingLink(false);
+              }}
+              className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-200 hover:bg-white/10 hover:text-white cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5 text-sky-400" />
+              <span>Link GitHub Code Repo</span>
+            </button>
+
+            {isEditingRepo && (
+              <div className="p-2 bg-black/80 rounded-lg border border-white/20 mt-1 flex flex-col gap-1.5">
+                <input
+                  type="url"
+                  placeholder="https://github.com/FaheemShaikhUXUI/..."
+                  value={tempRepo}
+                  onChange={(e) => setTempRepo(e.target.value)}
+                  className="w-full px-2 py-1 rounded bg-black/90 border border-white/25 text-[11px] text-white placeholder-gray-500 focus:outline-none focus:border-sky-400"
+                />
+                <div className="flex items-center justify-end gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingRepo(false)}
+                    className="px-2 py-0.5 rounded text-[10px] text-gray-400 hover:text-white cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onUpdateRepoUrl?.(tempRepo.trim());
+                      setIsEditingRepo(false);
+                      setMenuOpen(false);
+                    }}
+                    className="px-2.5 py-0.5 rounded text-[10px] font-semibold bg-sky-500 hover:bg-sky-600 text-white cursor-pointer"
+                  >
+                    Save Repo
                   </button>
                 </div>
               </div>
