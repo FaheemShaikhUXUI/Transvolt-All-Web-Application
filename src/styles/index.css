@@ -3,7 +3,6 @@
 @import './theme.css';
 
 html, body {
-  zoom: 0.9;
   background-color: #000000;
   background: #000000;
   min-height: 100%;

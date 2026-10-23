@@ -602,7 +602,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
       <AnimatedWaveBackground />
 
       {/* Main Page Scrollable Container */}
-      <div className="relative z-10 flex flex-col flex-1 w-full max-w-[1920px] mx-auto px-[10%] py-5">
+      <div className="relative z-10 flex flex-col flex-1 w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-5">
         {/* 1. Header Bar matching Image */}
         <header className="flex items-center justify-between pt-2 pb-5 mb-8 border-b border-white/[0.08]">
           {/* Left: Official Transvolt Logo */}
@@ -845,17 +845,17 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
             className="flex flex-col rounded-xl border border-white/[0.08] hover:border-emerald-500/30 bg-black/25 backdrop-blur-[2px] p-3 sm:p-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-colors min-h-[350px]"
           >
             {/* Column Header: Headline with Icon and Total Count Badge */}
-            <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-white/[0.06]">
-              <div className="flex items-center gap-2.5 flex-nowrap min-w-0">
-                <Monitor className="w-5 h-5 sm:w-6 sm:h-6 text-[#86efac] flex-shrink-0" />
-                <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold text-white tracking-wide whitespace-nowrap">
+            <div className="flex items-center justify-between gap-1.5 sm:gap-2 mb-4 pb-3 border-b border-white/[0.06]">
+              <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+                <Monitor className="w-5 h-5 text-[#86efac] flex-shrink-0" />
+                <h2 className="text-sm sm:text-base xl:text-lg font-bold text-white tracking-tight whitespace-nowrap">
                   All Web Application
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex-shrink-0">
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex-shrink-0">
                   {webTotalCount}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 flex-shrink-0">
                 <ColumnFilterDropdown
                   currentFilter={webFilter}
                   onSelect={setWebFilter}
@@ -865,7 +865,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                   categoryTitle="Web Application"
                   onAdd={(name, status, linkUrl) => handleAddProject(name, status, 'web', linkUrl)}
                 />
-                <div className="relative w-28 sm:w-32">
+                <div className="relative w-20 sm:w-24 lg:w-28">
                   <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
                   <input
                     type="text"
@@ -915,17 +915,17 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
             className="flex flex-col rounded-xl border border-white/[0.08] hover:border-blue-500/30 bg-black/25 backdrop-blur-[2px] p-3 sm:p-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-colors min-h-[350px]"
           >
             {/* Column Header: Headline with Icon and Total Count Badge */}
-            <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-white/[0.06]">
-              <div className="flex items-center gap-2.5 flex-nowrap min-w-0">
-                <Smartphone className="w-5 h-5 sm:w-6 sm:h-6 text-[#93c5fd] flex-shrink-0" />
-                <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold text-white tracking-wide whitespace-nowrap">
+            <div className="flex items-center justify-between gap-1.5 sm:gap-2 mb-4 pb-3 border-b border-white/[0.06]">
+              <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+                <Smartphone className="w-5 h-5 text-[#93c5fd] flex-shrink-0" />
+                <h2 className="text-sm sm:text-base xl:text-lg font-bold text-white tracking-tight whitespace-nowrap">
                   All Mobile Application
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30 flex-shrink-0">
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30 flex-shrink-0">
                   {mobileTotalCount}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 flex-shrink-0">
                 <ColumnFilterDropdown
                   currentFilter={mobileFilter}
                   onSelect={setMobileFilter}
@@ -935,7 +935,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                   categoryTitle="Mobile Application"
                   onAdd={(name, status, linkUrl) => handleAddProject(name, status, 'mobile', linkUrl)}
                 />
-                <div className="relative w-28 sm:w-32">
+                <div className="relative w-20 sm:w-24 lg:w-28">
                   <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
                   <input
                     type="text"
@@ -985,17 +985,17 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
             className="flex flex-col rounded-xl border border-white/[0.08] hover:border-purple-500/30 bg-black/25 backdrop-blur-[2px] p-3 sm:p-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-colors min-h-[350px]"
           >
             {/* Column Header: Headline with Icon and Total Count Badge */}
-            <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-white/[0.06]">
-              <div className="flex items-center gap-2.5 flex-nowrap min-w-0">
-                <Cpu className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400 flex-shrink-0" />
-                <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold text-white tracking-wide whitespace-nowrap">
+            <div className="flex items-center justify-between gap-1.5 sm:gap-2 mb-4 pb-3 border-b border-white/[0.06]">
+              <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+                <Cpu className="w-5 h-5 text-purple-400 flex-shrink-0" />
+                <h2 className="text-sm sm:text-base xl:text-lg font-bold text-white tracking-tight whitespace-nowrap">
                   Other Projects
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30 flex-shrink-0">
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30 flex-shrink-0">
                   {otherTotalCount}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 flex-shrink-0">
                 <ColumnFilterDropdown
                   currentFilter={otherFilter}
                   onSelect={setOtherFilter}
@@ -1005,7 +1005,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                   categoryTitle="Other Projects"
                   onAdd={(name, status, linkUrl) => handleAddProject(name, status, 'other', linkUrl)}
                 />
-                <div className="relative w-28 sm:w-32">
+                <div className="relative w-20 sm:w-24 lg:w-28">
                   <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
                   <input
                     type="text"
