@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, Filter, ExternalLink, ArrowRight, CheckCircle2, Clock, PauseCircle, Compass, MoreVertical, Trash2, Check, ChevronDown, Globe, Smartphone, Cpu, Boxes, GripVertical, Link2Off, Sparkles, LayoutDashboard, Plus, X, Pencil, Monitor } from 'lucide-react';
+import { Search, Filter, ExternalLink, ArrowRight, CheckCircle2, Clock, PauseCircle, Compass, MoreVertical, Trash2, Check, ChevronDown, Globe, Smartphone, Cpu, Boxes, GripVertical, Link2Off, Sparkles, LayoutDashboard, Plus, X, Pencil, Monitor, Download } from 'lucide-react';
 import LogoWhite from '../../imports/Logo_White.svg';
 
 // --- Wave Background anchored to 1920x1080 fixed aspect canvas without stretching ---
@@ -596,6 +596,18 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
     }
   };
 
+  const handleDownloadCodeZip = () => {
+    const zipUrl = 'https://github.com/FaheemShaikhUXUI/Transvolt-All-Web-Application/archive/refs/heads/main.zip';
+    const a = document.createElement('a');
+    a.href = zipUrl;
+    a.download = 'Transvolt-All-Web-Application.zip';
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
   return (
     <div className="relative min-h-screen w-full bg-[#000000] text-white flex flex-col overflow-y-auto selection:bg-[#548235] selection:text-white">
       {/* Running Lines Waves Background in 1920x1080 fixed aspect ratio (no distortion) */}
@@ -886,6 +898,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                   index={idx + 1}
                   item={item}
                   onVisit={() => handleVisit(item)}
+                  onDownload={handleDownloadCodeZip}
                   onSetStatus={(status) => handleSetStatus(item.id, status)}
                   onDelete={() => handleDeleteProject(item.id)}
                   onRename={(newName) => handleRenameProject(item.id, newName)}
@@ -956,6 +969,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                   index={idx + 1}
                   item={item}
                   onVisit={() => handleVisit(item)}
+                  onDownload={handleDownloadCodeZip}
                   onSetStatus={(status) => handleSetStatus(item.id, status)}
                   onDelete={() => handleDeleteProject(item.id)}
                   onRename={(newName) => handleRenameProject(item.id, newName)}
@@ -1026,6 +1040,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
                   index={idx + 1}
                   item={item}
                   onVisit={() => handleVisit(item)}
+                  onDownload={handleDownloadCodeZip}
                   onSetStatus={(status) => handleSetStatus(item.id, status)}
                   onDelete={() => handleDeleteProject(item.id)}
                   onRename={(newName) => handleRenameProject(item.id, newName)}
@@ -1287,6 +1302,7 @@ interface SuperGlassProjectTileProps {
   item: ProjectEntry;
   index?: number;
   onVisit: () => void;
+  onDownload?: () => void;
   onSetStatus: (status: ProjectStatusType) => void;
   onDelete: () => void;
   onRename: (newName: string) => void;
@@ -1294,7 +1310,7 @@ interface SuperGlassProjectTileProps {
   onUpdateLink?: (newLink: string) => void;
 }
 
-function SuperGlassProjectTile({ item, index = 1, onVisit, onSetStatus, onDelete, onRename, onReorder, onUpdateLink }: SuperGlassProjectTileProps) {
+function SuperGlassProjectTile({ item, index = 1, onVisit, onDownload, onSetStatus, onDelete, onRename, onReorder, onUpdateLink }: SuperGlassProjectTileProps) {
   const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [menuOpen, setMenuOpen] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
@@ -1458,8 +1474,22 @@ function SuperGlassProjectTile({ item, index = 1, onVisit, onSetStatus, onDelete
         </div>
       </div>
 
-      {/* Right Controls: Green Pill 'Visit' (or Inactive state) + 3-Dots Menu */}
+      {/* Right Controls: Green Pill 'Visit' (or Inactive state) + Download Circle + 3-Dots Menu */}
       <div className={`relative flex items-center gap-1.5 flex-shrink-0 ${menuOpen ? 'z-50' : 'z-10'}`} ref={menuRef}>
+        {/* Simple Green Circle with Download Icon on Left Side of Visit Button */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDownload?.();
+          }}
+          title="Download Complete Project Code (.zip)"
+          aria-label="Download Complete Project Code"
+          className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-[#10b981] hover:bg-[#059669] text-white flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 shadow-[0_2px_8px_rgba(16,185,129,0.35)] cursor-pointer flex-shrink-0"
+        >
+          <Download className="w-3.5 h-3.5 text-white stroke-[2.2]" />
+        </button>
+
         {item.isConnected ? (
           <button
             type="button"
