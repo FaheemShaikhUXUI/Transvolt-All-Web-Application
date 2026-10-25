@@ -284,6 +284,7 @@ const VERCEL_PRODUCTION_PROJECTS: ProjectEntry[] = [
     status: 'working',
     statusLabel: 'Working',
     isConnected: true,
+    repoUrl: 'https://github.com/FaheemShaikhUXUI/Transvolt-All-Web-Application',
   },
 
   // 2. All Mobile Application (2 Projects)
@@ -357,7 +358,7 @@ const VERCEL_PRODUCTION_PROJECTS: ProjectEntry[] = [
 ];
 
 const VERCEL_SYNC_VERSION_KEY = 'transvolt_vercel_sync_version';
-const VERCEL_CURRENT_VERSION = 'v3_insurance_synced_state';
+const VERCEL_CURRENT_VERSION = 'v4_insurance_live_active';
 const LOCAL_STORAGE_DATA_KEY = 'transvolt_all_projects_data';
 
 export function TransvoltAllProjects({ onOpenMISDashboard, onOpenInsurance }: TransvoltAllProjectsProps) {
@@ -378,7 +379,19 @@ export function TransvoltAllProjects({ onOpenMISDashboard, onOpenInsurance }: Tr
         }
 
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Guarantee that Insurance project is always connected and clickable
+          return parsed.map((p: ProjectEntry) => {
+            if (p.id === 'web-insurance' || p.name.toLowerCase().includes('insurance')) {
+              return {
+                ...p,
+                isConnected: true,
+                repoUrl: p.repoUrl || 'https://github.com/FaheemShaikhUXUI/Transvolt-All-Web-Application',
+              };
+            }
+            return p;
+          });
+        }
       }
     } catch {
       // Fallback
@@ -1492,7 +1505,7 @@ function SuperGlassProjectTile({ item, index = 1, onVisit, onDownload, onSetStat
     setTempRepo(item.repoUrl || '');
   }, [item.repoUrl]);
 
-  const hasCodeFile = Boolean(item.repoUrl && item.repoUrl.trim()) || item.id === 'mis-dashboard' || item.name.toLowerCase().includes('branding');
+  const hasCodeFile = Boolean(item.repoUrl && item.repoUrl.trim()) || item.id === 'mis-dashboard' || item.id === 'web-insurance' || item.name.toLowerCase().includes('insurance') || item.name.toLowerCase().includes('branding');
 
   useEffect(() => {
     const handleOutside = (e: MouseEvent) => {
@@ -1559,7 +1572,8 @@ function SuperGlassProjectTile({ item, index = 1, onVisit, onDownload, onSetStat
       }}
       onMouseMove={handleMouseMove}
       onClick={() => {
-        if (!isRenaming && item.isConnected) onVisit();
+        const canVisit = item.isConnected || item.id === 'web-insurance' || item.name.toLowerCase().includes('insurance');
+        if (!isRenaming && canVisit) onVisit();
       }}
       className={`group relative flex items-center justify-between px-3.5 sm:px-4 py-3 rounded-xl transition-all duration-200 overflow-visible border backdrop-blur-md shadow-[0_4px_16px_rgba(0,0,0,0.4)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.6)] hover:-translate-y-0.5 select-none ${
         isDragOver
@@ -1567,7 +1581,7 @@ function SuperGlassProjectTile({ item, index = 1, onVisit, onDownload, onSetStat
           : 'border-white/[0.07] hover:border-white/25 bg-[#141416]/75 hover:bg-[#1a1a1e]/85'
       } ${
         menuOpen ? 'z-50' : 'z-0'
-      } ${item.isConnected && !isRenaming ? 'cursor-pointer' : 'cursor-default'}`}
+      } ${(item.isConnected || item.id === 'web-insurance' || item.name.toLowerCase().includes('insurance')) && !isRenaming ? 'cursor-pointer' : 'cursor-default'}`}
     >
       {/* Specular Radial Sheen on hover */}
       <div
