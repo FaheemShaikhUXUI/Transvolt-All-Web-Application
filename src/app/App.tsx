@@ -6,11 +6,12 @@ import { MineSectorDashboard } from './components/dashboards/MineSectorDashboard
 import { PortSectorDashboard } from './components/dashboards/PortSectorDashboard';
 import { CementSectorDashboard } from './components/dashboards/CementSectorDashboard';
 import { MISReportDashboard } from './components/dashboards/MISReportDashboard';
+import { InsuranceDashboard } from './components/dashboards/InsuranceDashboard';
 import { TransvoltAllProjects } from './components/TransvoltAllProjects';
 import { ChevronRight } from 'lucide-react';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'projects' | 'dashboard'>('projects');
+  const [currentView, setCurrentView] = useState<'projects' | 'dashboard' | 'insurance'>('projects');
   const [activeTab, setActiveTab] = useState('MIS Report');
   const [currentSector, setCurrentSector] = useState('Public Sector');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -67,6 +68,17 @@ export default function App() {
           setActiveTab('MIS Report');
           setCurrentView('dashboard');
         }}
+        onOpenInsurance={() => {
+          setCurrentView('insurance');
+        }}
+      />
+    );
+  }
+
+  if (currentView === 'insurance') {
+    return (
+      <InsuranceDashboard
+        onBackToProjects={() => setCurrentView('projects')}
       />
     );
   }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, Filter, ExternalLink, ArrowRight, CheckCircle2, Clock, PauseCircle, Compass, MoreVertical, Trash2, Check, ChevronDown, Globe, Smartphone, Cpu, Boxes, GripVertical, Link2Off, Sparkles, LayoutDashboard, Plus, X, Pencil, Monitor, Download } from 'lucide-react';
+import { Search, Filter, ExternalLink, ArrowRight, CheckCircle2, Clock, PauseCircle, Compass, MoreVertical, Trash2, Check, ChevronDown, Globe, Smartphone, Cpu, Boxes, GripVertical, Link2Off, Sparkles, LayoutDashboard, Plus, X, Pencil, Monitor, Download, RefreshCw } from 'lucide-react';
 import JSZip from 'jszip';
 import LogoWhite from '../../imports/Logo_White.svg';
 
@@ -250,10 +250,12 @@ export interface ProjectEntry {
 
 interface TransvoltAllProjectsProps {
   onOpenMISDashboard: () => void;
+  onOpenInsurance: () => void;
 }
 
-const initialProjectsData: ProjectEntry[] = [
-  // Web Applications (MIS Dashboard as VERY FIRST)
+// Vercel Production Snapshot Baseline (10 Projects: 3 Web, 2 Mobile, 5 Other)
+const VERCEL_PRODUCTION_PROJECTS: ProjectEntry[] = [
+  // 1. All Web Application (3 Projects)
   {
     id: 'mis-dashboard',
     orderNumber: 1,
@@ -262,102 +264,56 @@ const initialProjectsData: ProjectEntry[] = [
     status: 'live',
     statusLabel: 'Live Since 09 July 2026',
     isFirst: true,
-    isConnected: true, // LIVE CONNECTED
+    isConnected: true,
     repoUrl: 'https://github.com/FaheemShaikhUXUI/Transvolt-All-Web-Application',
   },
   {
-    id: 'web-branding-portal',
+    id: 'web-incident-accident',
     orderNumber: 2,
-    name: 'Transvolt Branding Portal',
+    name: 'Incidennt Accident',
     category: 'web',
     status: 'working',
     statusLabel: 'Working',
     isConnected: false,
-    repoUrl: 'https://github.com/FaheemShaikhUXUI/Transvolt_Branding_Portal_V4',
   },
   {
-    id: 'web-corporate-site',
+    id: 'web-insurance',
     orderNumber: 3,
-    name: 'Transvolt Website 2027',
+    name: 'Insurance',
     category: 'web',
-    status: 'hold',
-    statusLabel: 'Hold',
-    isConnected: false,
-  },
-  {
-    id: 'web-eleverve',
-    orderNumber: 4,
-    name: 'ELEVERVE Green Portal',
-    category: 'web',
-    status: 'planning',
-    statusLabel: 'Planning',
-    isConnected: false,
-  },
-  {
-    id: 'web-telematics-hub',
-    orderNumber: 5,
-    name: 'Fleet Analytics Hub',
-    category: 'web',
-    status: 'planning',
-    statusLabel: 'Planning',
-    isConnected: false,
+    status: 'working',
+    statusLabel: 'Working',
+    isConnected: true,
   },
 
-  // Mobile Applications
+  // 2. All Mobile Application (2 Projects)
   {
-    id: 'mob-driver-app',
+    id: 'mob-mine-ops',
     orderNumber: 1,
-    name: 'MIS Dashbaord Mobile',
-    category: 'mobile',
-    status: 'live',
-    statusLabel: 'Live Since 09 July 2026',
-    isConnected: false,
-  },
-  {
-    id: 'mob-fleet-maintenance',
-    orderNumber: 2,
-    name: 'Driver Logsheet & Trip App',
-    category: 'mobile',
-    status: 'working',
-    statusLabel: 'Working',
-    isConnected: false,
-  },
-  {
-    id: 'mob-supervisor-dispatch',
-    orderNumber: 3,
-    name: 'Supervisor Dispatch App',
-    category: 'mobile',
-    status: 'hold',
-    statusLabel: 'Hold',
-    isConnected: false,
-  },
-  {
-    id: 'mob-executive-suite',
-    orderNumber: 4,
-    name: 'Transvolt Executive Mobile',
+    name: 'Mine Ops.',
     category: 'mobile',
     status: 'planning',
     statusLabel: 'Planning',
     isConnected: false,
   },
   {
-    id: 'mob-tech-inspection',
-    orderNumber: 5,
-    name: 'Depot QR Inspection App',
+    id: 'mob-depot-ops',
+    orderNumber: 2,
+    name: 'Depot Ops.',
     category: 'mobile',
     status: 'planning',
     statusLabel: 'Planning',
     isConnected: false,
   },
 
-  // Other Projects
+  // 3. Other Projects (5 Projects)
   {
-    id: 'oth-website',
+    id: 'oth-transvolt-website',
     orderNumber: 1,
     name: 'Transvolt Website',
     category: 'other',
-    status: 'live',
-    statusLabel: 'Live Since 09 July 2026',
+    status: 'hold',
+    statusLabel: 'Hold',
     isConnected: false,
   },
   {
@@ -372,56 +328,89 @@ const initialProjectsData: ProjectEntry[] = [
     repoUrl: 'https://github.com/FaheemShaikhUXUI/Transvolt_Branding_Portal_V4',
   },
   {
-    id: 'oth-charging-cms',
+    id: 'oth-contech-brain',
     orderNumber: 3,
-    name: 'OCPP Charger CMS',
+    name: 'Contech Brain',
     category: 'other',
     status: 'hold',
     statusLabel: 'Hold',
     isConnected: false,
   },
   {
-    id: 'oth-battery-analytics',
+    id: 'oth-eleverve-green',
     orderNumber: 4,
-    name: 'Battery SOH AI Engine',
+    name: 'Eleverve Green Website - EFS',
     category: 'other',
-    status: 'planning',
-    statusLabel: 'Planning',
+    status: 'hold',
+    statusLabel: 'Hold',
     isConnected: false,
   },
   {
-    id: 'oth-erp-bridge',
+    id: 'oth-document-controller',
     orderNumber: 5,
-    name: 'SAP & Tally Financial Bridge',
+    name: 'Document Controller',
     category: 'other',
     status: 'planning',
     statusLabel: 'Planning',
     isConnected: false,
   },
 ];
-export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProjectsProps) {
+
+const VERCEL_SYNC_VERSION_KEY = 'transvolt_vercel_sync_version';
+const VERCEL_CURRENT_VERSION = 'v3_insurance_synced_state';
+const LOCAL_STORAGE_DATA_KEY = 'transvolt_all_projects_data';
+
+export function TransvoltAllProjects({ onOpenMISDashboard, onOpenInsurance }: TransvoltAllProjectsProps) {
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
+
   const [projectsData, setProjectsData] = useState<ProjectEntry[]>(() => {
     try {
-      const saved = typeof window !== 'undefined' ? localStorage.getItem('transvolt_all_projects_data') : null;
-      if (saved) {
+      if (typeof window !== 'undefined') {
+        const storedVersion = localStorage.getItem(VERCEL_SYNC_VERSION_KEY);
+        const saved = localStorage.getItem(LOCAL_STORAGE_DATA_KEY);
+
+        // Auto-seed and align with Vercel if version mismatch or not set
+        if (storedVersion !== VERCEL_CURRENT_VERSION || !saved) {
+          localStorage.setItem(LOCAL_STORAGE_DATA_KEY, JSON.stringify(VERCEL_PRODUCTION_PROJECTS));
+          localStorage.setItem(VERCEL_SYNC_VERSION_KEY, VERCEL_CURRENT_VERSION);
+          return VERCEL_PRODUCTION_PROJECTS;
+        }
+
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch {
-      // Fallback to default list
+      // Fallback
     }
-    return initialProjectsData;
+    return VERCEL_PRODUCTION_PROJECTS;
   });
 
   useEffect(() => {
     try {
       if (typeof window !== 'undefined') {
-        localStorage.setItem('transvolt_all_projects_data', JSON.stringify(projectsData));
+        localStorage.setItem(LOCAL_STORAGE_DATA_KEY, JSON.stringify(projectsData));
       }
     } catch {
       // Ignore storage errors
     }
   }, [projectsData]);
+
+  // Smart Sync with Vercel Handler
+  const handleSyncWithVercel = () => {
+    setIsSyncing(true);
+    try {
+      localStorage.setItem(LOCAL_STORAGE_DATA_KEY, JSON.stringify(VERCEL_PRODUCTION_PROJECTS));
+      localStorage.setItem(VERCEL_SYNC_VERSION_KEY, VERCEL_CURRENT_VERSION);
+      setProjectsData(VERCEL_PRODUCTION_PROJECTS);
+      setSyncFeedback('Memory synced with Vercel (10 Projects)');
+      setTimeout(() => setSyncFeedback(null), 3000);
+    } catch (err) {
+      console.error('Failed to sync with Vercel memory:', err);
+    } finally {
+      setTimeout(() => setIsSyncing(false), 500);
+    }
+  };
   const [globalSearch, setGlobalSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<ProjectStatusType | 'all'>('all');
 
@@ -607,6 +596,8 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
   const handleVisit = (item: ProjectEntry) => {
     if (item.id === 'mis-dashboard') {
       onOpenMISDashboard();
+    } else if (item.id === 'web-insurance' || item.name.toLowerCase().includes('insurance')) {
+      onOpenInsurance();
     } else if (item.linkUrl) {
       window.open(item.linkUrl, '_blank', 'noopener,noreferrer');
     } else {
@@ -678,18 +669,47 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
             </h1>
           </div>
 
-          {/* Right: Search Box */}
-          <div className="relative w-48 sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-            <input
-              type="text"
-              placeholder="Search"
-              value={globalSearch}
-              onChange={(e) => setGlobalSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 rounded-full bg-black/60 border border-white/10 text-xs sm:text-sm text-white placeholder-gray-500 focus:outline-none focus:border-white/30 transition-all"
-            />
+          {/* Right: Search Box + Vercel Memory Sync Button */}
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={handleSyncWithVercel}
+              title="Sync Localhost Memory with Vercel Production Snapshot"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/[0.08] hover:bg-white/[0.14] border border-white/15 text-gray-200 hover:text-white transition-all cursor-pointer shadow-sm active:scale-95"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-emerald-400 ${isSyncing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Sync with Vercel</span>
+            </button>
+
+            <div className="relative w-40 sm:w-56">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <input
+                type="text"
+                placeholder="Search"
+                value={globalSearch}
+                onChange={(e) => setGlobalSearch(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 rounded-full bg-black/60 border border-white/10 text-xs sm:text-sm text-white placeholder-gray-500 focus:outline-none focus:border-white/30 transition-all"
+              />
+            </div>
           </div>
         </header>
+
+        {/* Sync Toast Feedback Banner */}
+        {syncFeedback && (
+          <div className="mb-4 px-4 py-2 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs sm:text-sm font-medium flex items-center justify-between shadow-lg animate-in fade-in slide-in-from-top duration-200">
+            <span className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-emerald-400" />
+              {syncFeedback}
+            </span>
+            <button
+              type="button"
+              onClick={() => setSyncFeedback(null)}
+              className="text-emerald-400 hover:text-white p-0.5 rounded cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         {/* 2. Top Status Cards Row (All Projects, Live Projects, Working, Hold, Under Planning) */}
         <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6">
@@ -755,13 +775,13 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
             {/* Below Tile Name: 90% Large 3D Icon on Left & Bold Count on Right */}
             <div className="relative z-10 flex items-center justify-between w-full mt-2">
               {/* 3D Large Icon */}
-              <div className="relative flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-emerald-400/40 via-emerald-600/30 to-[#064e3b]/80 border border-emerald-400/60 shadow-[inset_0_2px_4px_rgba(255,255,255,0.45),inset_0_-2px_4px_rgba(0,0,0,0.7),0_8px_18px_rgba(16,185,129,0.45)] backdrop-blur-md transform group-hover:scale-110 group-hover:-translate-y-0.5 group-hover:rotate-3 transition-all duration-300">
+              <div className="relative flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-emerald-400/40 via-emerald-600/30 to-[#064e3b]/80 border border-emerald-400/60 shadow-[inset_0_2px_4px_rgba(255,255,255,0.45),inset_0_-2px_4px_rgba(0,0,0,0.7),0_8px_18px_rgba(168,85,247,0.45)] backdrop-blur-md transform group-hover:scale-110 group-hover:-translate-y-0.5 group-hover:rotate-3 transition-all duration-300">
                 <CheckCircle2 className="w-6 h-6 sm:w-7 sm:h-7 text-emerald-100 filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.85)]" />
               </div>
 
               {/* Count */}
               <span className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-md">
-                {counts.live || 12}
+                {counts.live}
               </span>
             </div>
 
@@ -799,7 +819,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
 
               {/* Count */}
               <span className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-md">
-                {counts.working || 12}
+                {counts.working}
               </span>
             </div>
 
@@ -837,7 +857,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
 
               {/* Count */}
               <span className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-md">
-                {counts.hold || 12}
+                {counts.hold}
               </span>
             </div>
 
@@ -875,7 +895,7 @@ export function TransvoltAllProjects({ onOpenMISDashboard }: TransvoltAllProject
 
               {/* Count */}
               <span className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-md">
-                {counts.planning || 12}
+                {counts.planning}
               </span>
             </div>
 
@@ -1648,7 +1668,7 @@ function SuperGlassProjectTile({ item, index = 1, onVisit, onDownload, onSetStat
           </button>
         )}
 
-        {item.isConnected ? (
+        {item.isConnected || item.id === 'web-insurance' || item.name.toLowerCase().includes('insurance') ? (
           <button
             type="button"
             onClick={(e) => {
