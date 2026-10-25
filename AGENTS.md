@@ -13,7 +13,7 @@
 
 ## Vercel Deployment
 - **Live Production URL**: [https://transvolt-all-web-application.vercel.app/](https://transvolt-all-web-application.vercel.app/)
-- **Live Preview URL**: [https://transvolt-all-web-application-e416qs0g1-design25.vercel.app/](https://transvolt-all-web-application-e416qs0g1-design25.vercel.app/)
+- **Live Preview URL**: [https://transvolt-all-web-application-rk45exeam-design25.vercel.app/](https://transvolt-all-web-application-rk45exeam-design25.vercel.app/)
 - **Vercel Project Name**: `transvolt-all-web-application`
 - **Project ID**: `prj_QrZY1BHacIR1byd8Amf6VFaAzuLK`
 - **Org ID**: `team_wbjf1HIhx24FLd9VaDvkC2bO`
