@@ -37,12 +37,14 @@ import {
 import TransvoltLogo from '../../../imports/Transvolt_logo_Black.svg';
 import LogoIcon from '../../../imports/Logo_Icon.svg';
 import { MotorClaimFormModal } from './MotorClaimFormModal';
+import { CaseOverviewPage } from './CaseOverviewPage';
 
 export interface InsuranceCase {
   srNo: number;
   caseId: string;
+  caseType?: 'Incident' | 'Accident' | 'Minor';
   vehicleNumber: string;
-  type: 'Trailer' | 'Bus';
+  type: 'Trailer' | 'Bus' | 'Truck';
   policyNumber: string;
   pilotName: string;
   pilotId: string;
@@ -183,7 +185,7 @@ const initialInsuranceData: InsuranceCase[] = [
     srNo: 9,
     caseId: 'INC-CM-0113',
     vehicleNumber: 'MH123333',
-    type: 'Bus',
+    type: 'Truck',
     policyNumber: 'POL1002',
     pilotName: 'Mr. driv12 test',
     pilotId: 'PLT-0113',
@@ -198,7 +200,7 @@ const initialInsuranceData: InsuranceCase[] = [
     srNo: 10,
     caseId: 'INC-CM-0112',
     vehicleNumber: 'ML11A04069',
-    type: 'Bus',
+    type: 'Truck',
     policyNumber: 'POL1020',
     pilotName: 'Mr. driv test',
     pilotId: 'PLT-0112',
@@ -297,6 +299,8 @@ export function InsuranceDashboard({ onBackToProjects }: InsuranceDashboardProps
   const [isDark, setIsDark] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'All' | 'Pending' | 'Completed' | 'Archived'>('All');
+  const [vehicleTypeFilter, setVehicleTypeFilter] = useState<'All' | 'Bus' | 'Truck' | 'Trailer'>('All');
+  const [caseTypeFilter, setCaseTypeFilter] = useState<'All' | 'Incident' | 'Accident' | 'Minor'>('All');
   const [selectedSite, setSelectedSite] = useState('Coal Mines');
   const [siteDropdownOpen, setSiteDropdownOpen] = useState(false);
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
@@ -310,6 +314,7 @@ export function InsuranceDashboard({ onBackToProjects }: InsuranceDashboardProps
   const [insuranceData, setInsuranceData] = useState<InsuranceCase[]>(initialInsuranceData);
   const [editingClaimRow, setEditingClaimRow] = useState<InsuranceCase | null>(null);
   const [editingCompany, setEditingCompany] = useState<string>('The New India Assurance Co. Ltd.');
+  const [selectedCaseForOverview, setSelectedCaseForOverview] = useState<InsuranceCase | null>(null);
   const [archivedCaseIds, setArchivedCaseIds] = useState<string[]>([]);
   const [archiveToast, setArchiveToast] = useState<string | null>(null);
   const [archiveGlow, setArchiveGlow] = useState<'purple' | 'orange' | null>(null);
@@ -346,14 +351,24 @@ export function InsuranceDashboard({ onBackToProjects }: InsuranceDashboardProps
     if (!matchesSearch) return false;
 
     if (statusFilter === 'Pending') {
-      return item.statusType === 'danger' || item.status.toLowerCase().includes('pending') || item.status.toLowerCase().includes('claim') || item.reassess;
+      if (!(item.statusType === 'danger' || item.status.toLowerCase().includes('pending') || item.status.toLowerCase().includes('claim') || item.reassess)) {
+        return false;
+      }
+    } else if (statusFilter === 'Completed') {
+      if (item.statusType !== 'success') return false;
+    } else if (statusFilter === 'Archived') {
+      if (!archivedCaseIds.includes(item.caseId)) return false;
     }
-    if (statusFilter === 'Completed') {
-      return item.statusType === 'success';
+
+    if (vehicleTypeFilter !== 'All' && item.type !== vehicleTypeFilter) {
+      return false;
     }
-    if (statusFilter === 'Archived') {
-      return archivedCaseIds.includes(item.caseId);
+
+    const itemCaseType = item.caseType || (item.srNo % 3 === 1 ? 'Incident' : item.srNo % 3 === 2 ? 'Accident' : 'Minor');
+    if (caseTypeFilter !== 'All' && itemCaseType !== caseTypeFilter) {
+      return false;
     }
+
     return true;
   });
 
@@ -616,21 +631,37 @@ export function InsuranceDashboard({ onBackToProjects }: InsuranceDashboardProps
         {/* Page Body Container */}
         <main className="flex-1 overflow-y-auto px-6 md:px-8 pt-4 pb-6">
           {/* Breadcrumbs & Title with equal compact spacing top & bottom */}
+          {/* Breadcrumb Header */}
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-lg md:text-xl font-bold text-slate-800 dark:text-white tracking-tight">
-              Insurance
+              {selectedCaseForOverview ? 'Case Overview' : 'Insurance'}
             </h1>
             <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-              <span className="hover:text-slate-600 cursor-pointer" onClick={onBackToProjects}>Home</span>
+              <span className="hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer" onClick={onBackToProjects}>Home</span>
               <span>&gt;</span>
-              <span className="text-slate-600 dark:text-slate-300 font-semibold">Insurance</span>
+              <span
+                className={`cursor-pointer ${selectedCaseForOverview ? 'hover:text-slate-600 dark:hover:text-slate-200' : 'text-slate-600 dark:text-slate-300 font-semibold'}`}
+                onClick={() => setSelectedCaseForOverview(null)}
+              >
+                Insurance
+              </span>
+              {selectedCaseForOverview && (
+                <>
+                  <span>&gt;</span>
+                  <span className="text-slate-600 dark:text-slate-300 font-semibold">{selectedCaseForOverview.caseId}</span>
+                </>
+              )}
             </div>
           </div>
 
-
-
-          {/* Main Card: Insurance List Table Card */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
+          {selectedCaseForOverview ? (
+            <CaseOverviewPage
+              caseData={selectedCaseForOverview}
+              onBack={() => setSelectedCaseForOverview(null)}
+            />
+          ) : (
+            /* Main Card: Insurance List Table Card */
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
             {/* Card Header: Back Arrow + Title + Search + Filter */}
             <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               {/* Left Title with Back Arrow */}
@@ -696,30 +727,153 @@ export function InsuranceDashboard({ onBackToProjects }: InsuranceDashboardProps
                   <button
                     type="button"
                     onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 transition-colors cursor-pointer"
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors cursor-pointer ${
+                      statusFilter !== 'All' || vehicleTypeFilter !== 'All' || caseTypeFilter !== 'All'
+                        ? 'border-blue-400 dark:border-blue-500 bg-blue-50/70 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300'
+                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60'
+                    }`}
                   >
-                    <Filter className="w-3.5 h-3.5 text-slate-500" />
-                    <span>{statusFilter}</span>
+                    <Filter className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                    <span>
+                      {(() => {
+                        const parts = [];
+                        if (statusFilter !== 'All') parts.push(statusFilter);
+                        if (vehicleTypeFilter !== 'All') parts.push(vehicleTypeFilter);
+                        if (caseTypeFilter !== 'All') parts.push(caseTypeFilter);
+                        if (parts.length === 0) return 'All';
+                        if (parts.length <= 2) return parts.join(' • ');
+                        return `Filtered (${parts.length})`;
+                      })()}
+                    </span>
                     <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
                   </button>
+
                   {filterDropdownOpen && (
-                    <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg py-1 z-50 text-xs font-medium">
-                      {(['All', 'Pending', 'Completed', 'Archived'] as const).map(option => (
-                        <button
-                          key={option}
-                          type="button"
-                          onClick={() => {
-                            setStatusFilter(option);
-                            setFilterDropdownOpen(false);
-                          }}
-                          className={`w-full text-left px-3 py-1.5 hover:bg-blue-50 dark:hover:bg-slate-700 ${
-                            statusFilter === option ? 'text-blue-600 font-semibold' : 'text-slate-700 dark:text-slate-200'
-                          }`}
-                        >
-                          {option}
-                        </button>
-                      ))}
-                    </div>
+                    <>
+                      <div
+                        className="fixed inset-0 z-40"
+                        onClick={() => setFilterDropdownOpen(false)}
+                      />
+                      <div className="absolute right-0 mt-1 w-52 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl py-1.5 z-50 text-xs max-h-[85vh] overflow-y-auto">
+                        {/* Status Section */}
+                        <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                          Status
+                        </div>
+                        {(['All', 'Pending', 'Completed', 'Archived'] as const).map(option => (
+                          <button
+                            key={option}
+                            type="button"
+                            onClick={() => {
+                              setStatusFilter(option);
+                              setCurrentPage(1);
+                              setFilterDropdownOpen(false);
+                            }}
+                            className={`w-full flex items-center justify-between text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors cursor-pointer ${
+                              statusFilter === option
+                                ? 'text-blue-600 dark:text-blue-400 font-semibold bg-blue-50/60 dark:bg-blue-950/30'
+                                : 'text-slate-700 dark:text-slate-200'
+                            }`}
+                          >
+                            <span>{option === 'All' ? 'All Status' : option}</span>
+                            {statusFilter === option && <Check className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />}
+                          </button>
+                        ))}
+
+                        {/* Divider */}
+                        <div className="my-1.5 border-t border-slate-100 dark:border-slate-700" />
+
+                        {/* Case Type Section */}
+                        <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                          Case Type
+                        </div>
+                        {(['All', 'Incident', 'Accident', 'Minor'] as const).map(ct => (
+                          <button
+                            key={ct}
+                            type="button"
+                            onClick={() => {
+                              setCaseTypeFilter(ct);
+                              setCurrentPage(1);
+                              setFilterDropdownOpen(false);
+                            }}
+                            className={`w-full flex items-center justify-between text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors cursor-pointer ${
+                              caseTypeFilter === ct
+                                ? 'text-blue-600 dark:text-blue-400 font-semibold bg-blue-50/60 dark:bg-blue-950/30'
+                                : 'text-slate-700 dark:text-slate-200'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              {ct === 'Incident' && (
+                                <span className="w-2 h-2 rounded-full bg-orange-500" />
+                              )}
+                              {ct === 'Accident' && (
+                                <span className="w-2 h-2 rounded-full bg-red-500" />
+                              )}
+                              {ct === 'Minor' && (
+                                <span className="w-2 h-2 rounded-full bg-sky-500" />
+                              )}
+                              <span>{ct === 'All' ? 'All Case Types' : ct}</span>
+                            </div>
+                            {caseTypeFilter === ct && <Check className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />}
+                          </button>
+                        ))}
+
+                        {/* Divider */}
+                        <div className="my-1.5 border-t border-slate-100 dark:border-slate-700" />
+
+                        {/* Vehicle Type Section */}
+                        <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                          Vehicle Type
+                        </div>
+                        {(['All', 'Bus', 'Truck', 'Trailer'] as const).map(type => (
+                          <button
+                            key={type}
+                            type="button"
+                            onClick={() => {
+                              setVehicleTypeFilter(type);
+                              setCurrentPage(1);
+                              setFilterDropdownOpen(false);
+                            }}
+                            className={`w-full flex items-center justify-between text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors cursor-pointer ${
+                              vehicleTypeFilter === type
+                                ? 'text-blue-600 dark:text-blue-400 font-semibold bg-blue-50/60 dark:bg-blue-950/30'
+                                : 'text-slate-700 dark:text-slate-200'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              {type === 'Bus' && <Bus className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />}
+                              {type === 'Truck' && <Truck className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />}
+                              {type === 'Trailer' && (
+                                <svg className="w-3.5 h-2 fill-current text-amber-600 dark:text-amber-400" viewBox="0 0 29 14">
+                                  <path d="M1 2.2h19v6.2H1V2.2z M19 4.2h2.8l1.6 3v2.8h-4.4z" />
+                                </svg>
+                              )}
+                              <span>{type === 'All' ? 'All Types' : type}</span>
+                            </div>
+                            {vehicleTypeFilter === type && <Check className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />}
+                          </button>
+                        ))}
+
+                        {/* Reset All Filters */}
+                        {(statusFilter !== 'All' || vehicleTypeFilter !== 'All' || caseTypeFilter !== 'All') && (
+                          <>
+                            <div className="my-1.5 border-t border-slate-100 dark:border-slate-700" />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setStatusFilter('All');
+                                setVehicleTypeFilter('All');
+                                setCaseTypeFilter('All');
+                                setCurrentPage(1);
+                                setFilterDropdownOpen(false);
+                              }}
+                              className="w-full text-center px-3 py-1 text-[11px] font-semibold text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+                            >
+                              Reset All Filters
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
@@ -745,7 +899,6 @@ export function InsuranceDashboard({ onBackToProjects }: InsuranceDashboardProps
                     </th>
                     <th className="py-3.5 px-4 font-bold">Case ID</th>
                     <th className="py-3.5 px-4 font-bold">Vehicle Number</th>
-                    <th className="py-3.5 px-4 font-bold text-center w-16">Type</th>
                     <th className="py-3.5 px-4 font-bold">Policy Number</th>
                     <th className="py-3.5 px-4 font-bold">Pilot Name</th>
                     <th className="py-3.5 px-4 font-bold text-center">Schedule</th>
@@ -759,13 +912,19 @@ export function InsuranceDashboard({ onBackToProjects }: InsuranceDashboardProps
                   {paginatedData.map((row, idx) => (
                     <tr
                       key={row.caseId}
-                      className={`group transition-all duration-150 border-l-2 ${
+                      onClick={(e) => {
+                        const target = e.target as HTMLElement;
+                        if (target.closest('button') || target.closest('input') || target.closest('select')) return;
+                        setSelectedCaseForOverview(row);
+                      }}
+                      className={`group transition-all duration-150 border-l-2 cursor-pointer ${
                         archivedCaseIds.includes(row.caseId)
                           ? 'border-l-purple-500 bg-purple-50/40 dark:bg-purple-950/20'
                           : idx % 2 === 0
-                            ? 'border-l-transparent hover:border-l-emerald-500 hover:bg-emerald-50/80 dark:hover:bg-emerald-950/40 bg-white dark:bg-slate-900'
-                            : 'border-l-transparent hover:border-l-emerald-500 hover:bg-emerald-50/80 dark:hover:bg-emerald-950/40 bg-slate-100/85 dark:bg-slate-800/60'
+                            ? 'border-l-transparent hover:border-l-blue-500 hover:bg-blue-50/40 dark:hover:bg-blue-950/20 bg-white dark:bg-slate-900'
+                            : 'border-l-transparent hover:border-l-blue-500 hover:bg-blue-50/40 dark:hover:bg-blue-950/20 bg-slate-100/85 dark:bg-slate-800/60'
                       }`}
+                      title="Click anywhere on row to view Case Overview"
                     >
                       {/* Col 1: Sr No */}
                       <td className="py-3.5 px-3 text-center text-slate-400 font-mono text-[11px]">
@@ -773,7 +932,7 @@ export function InsuranceDashboard({ onBackToProjects }: InsuranceDashboardProps
                       </td>
 
                       {/* Col: Direct Checkbox or Minus Icon for Archived */}
-                      <td className="py-3.5 px-2 text-center">
+                      <td className="py-3.5 px-2 text-center" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-center">
                           {archivedCaseIds.includes(row.caseId) ? (
                             <button
@@ -796,106 +955,81 @@ export function InsuranceDashboard({ onBackToProjects }: InsuranceDashboardProps
                         </div>
                       </td>
 
-                      {/* Col 2: Case ID with Copy Icon & Archived Badge */}
+                      {/* Col 2: Case ID with Copy Icon & Case Type below without frame */}
                       <td className="py-3.5 px-4">
                         <div className="flex flex-col">
                           <div className="flex items-center gap-1.5">
                             <button
                               type="button"
-                              onClick={(e) => handleCopyText(row.caseId, e)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCopyText(row.caseId, e);
+                              }}
                               className="p-1 rounded-md text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-700/60 transition-colors cursor-pointer opacity-70 group-hover:opacity-100"
                               title="Copy Case ID"
                             >
                               <Copy className="w-3.5 h-3.5" />
                             </button>
-                            <span className="font-bold text-slate-900 dark:text-white tracking-tight">{row.caseId}</span>
-                          </div>
-                          {archivedCaseIds.includes(row.caseId) && (
-                            <span className="inline-flex items-center w-fit px-1.5 py-0.5 rounded text-[9.5px] font-bold uppercase tracking-wider bg-purple-50 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/70 mt-1 shadow-2xs">
-                              Archived
+                            <span
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedCaseForOverview(row);
+                              }}
+                              className="font-bold text-slate-900 dark:text-white tracking-tight hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition-colors cursor-pointer"
+                              title="Click to view Case Overview"
+                            >
+                              {row.caseId}
                             </span>
-                          )}
+                          </div>
+
+                          {/* Case Type Text Bellow Case ID - No frame, just text in respective colors */}
+                          <div className="flex items-center gap-1.5 ml-6 mt-0.5">
+                            {(() => {
+                              const ct = row.caseType || (row.srNo % 3 === 1 ? 'Incident' : row.srNo % 3 === 2 ? 'Accident' : 'Minor');
+                              const colorClass = ct === 'Incident'
+                                ? 'text-orange-500 dark:text-orange-400'
+                                : ct === 'Accident'
+                                  ? 'text-red-500 dark:text-red-400'
+                                  : 'text-sky-500 dark:text-sky-400';
+                              return (
+                                <span className={`text-[11px] font-semibold tracking-wide ${colorClass}`}>
+                                  {ct}
+                                </span>
+                              );
+                            })()}
+                            {archivedCaseIds.includes(row.caseId) && (
+                              <span className="inline-flex items-center w-fit px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-purple-50 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/70 shadow-2xs">
+                                Archived
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </td>
 
-                      {/* Col 3: Vehicle Number with Copy Icon */}
+                      {/* Col 3: Vehicle Number with Copy Icon & Vehicle Type below without frame */}
                       <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            type="button"
-                            onClick={(e) => handleCopyText(row.vehicleNumber, e)}
-                            className="p-1 rounded-md text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-700/60 transition-colors cursor-pointer opacity-70 group-hover:opacity-100"
-                            title="Copy Vehicle Number"
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                          </button>
-                          <span className="text-slate-700 dark:text-slate-200 font-semibold">{row.vehicleNumber}</span>
-                        </div>
-                      </td>
-
-                      {/* Col 4: Type Icon (No text) */}
-                      <td className="py-3 px-4 text-center">
-                        <div className="flex items-center justify-center">
-                          {row.type === 'Trailer' ? (
-                            <div
-                              title="Trailer (Commercial Freight Hauler)"
-                              className="w-8 h-7.5 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-200/90 dark:border-amber-800/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shadow-2xs hover:scale-110 transition-transform cursor-pointer px-1"
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCopyText(row.vehicleNumber, e);
+                              }}
+                              className="p-1 rounded-md text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-700/60 transition-colors cursor-pointer opacity-70 group-hover:opacity-100"
+                              title="Copy Vehicle Number"
                             >
-                              <svg
-                                className="w-6 h-3.5 fill-current"
-                                viewBox="0 0 29 14"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                {/* Trailer Cargo Body on Left */}
-                                <path d="M1 2.2h19v6.2H1V2.2z" />
-                                
-                                {/* Trailer Rear Mudflap / Bumper */}
-                                <path d="M1 8.4v1.8h0.8" stroke="currentColor" strokeWidth="0.6" strokeLinecap="round" />
+                              <Copy className="w-3.5 h-3.5" />
+                            </button>
+                            <span className="text-slate-700 dark:text-slate-200 font-semibold">{row.vehicleNumber}</span>
+                          </div>
 
-                                {/* Chassis Rail / Skirt under trailer */}
-                                <path d="M12 8.4h6v0.8h-6z" />
-
-                                {/* Tractor Unit facing Right */}
-                                <path d="M19 4.2h1.2c0.2-1.7 1.3-2.4 2.8-2.4 0.3 0 0.7 0.1 0.9 0.3v1.7h1.4l1.6 3v2.8h-0.9a1.7 1.7 0 0 0-3.3 0h-2.1a1.7 1.7 0 0 0-3.3 0H16V7h3V4.2z" />
-                                
-                                {/* Windshield Window Cutout */}
-                                <polygon points="23.2,4.4 24.8,4.4 26,6.6 23.2,6.6" className="fill-amber-50 dark:fill-amber-950" />
-
-                                {/* Triple Trailer Wheels on Left */}
-                                <circle cx="4.2" cy="11.2" r="1.6" />
-                                <circle cx="4.2" cy="11.2" r="0.6" className="fill-amber-50 dark:fill-amber-950" />
-
-                                <circle cx="7.2" cy="11.2" r="1.6" />
-                                <circle cx="7.2" cy="11.2" r="0.6" className="fill-amber-50 dark:fill-amber-950" />
-
-                                <circle cx="10.2" cy="11.2" r="1.6" />
-                                <circle cx="10.2" cy="11.2" r="0.6" className="fill-amber-50 dark:fill-amber-950" />
-
-                                {/* Tractor Rear Drive Wheel */}
-                                <circle cx="17.8" cy="11.2" r="1.6" />
-                                <circle cx="17.8" cy="11.2" r="0.6" className="fill-amber-50 dark:fill-amber-950" />
-
-                                {/* Tractor Front Steering Wheel on Right */}
-                                <circle cx="24.4" cy="11.2" r="1.6" />
-                                <circle cx="24.4" cy="11.2" r="0.6" className="fill-amber-50 dark:fill-amber-950" />
-                              </svg>
-                            </div>
-                          ) : row.type === 'Bus' ? (
-                            <div
-                              title="Bus (Passenger Transport)"
-                              className="w-7.5 h-7.5 rounded-lg bg-cyan-50 dark:bg-cyan-950/50 border border-cyan-200/90 dark:border-cyan-800/60 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shadow-2xs hover:scale-110 transition-transform cursor-pointer"
-                            >
-                              <Bus className="w-4.5 h-4.5 stroke-[2]" />
-                            </div>
-                          ) : (
-                            <div
-                              title={`Vehicle: ${row.type}`}
-                              className="w-7.5 h-7.5 rounded-lg bg-blue-50 dark:bg-blue-950/50 border border-blue-200/90 dark:border-blue-800/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-2xs hover:scale-110 transition-transform cursor-pointer"
-                            >
-                              <Truck className="w-4.5 h-4.5 stroke-[2]" />
-                            </div>
-                          )}
+                          {/* Vehicle Type below Vehicle Number in gray without frame */}
+                          <div className="ml-6 mt-0.5">
+                            <span className="text-[11px] font-medium tracking-wide text-slate-400 dark:text-slate-500">
+                              {row.type}
+                            </span>
+                          </div>
                         </div>
                       </td>
 
@@ -1150,6 +1284,7 @@ export function InsuranceDashboard({ onBackToProjects }: InsuranceDashboardProps
               </div>
             </div>
           </div>
+          )}
         </main>
       </div>
 
